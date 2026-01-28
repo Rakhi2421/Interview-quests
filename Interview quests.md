@@ -36,43 +36,43 @@
 <summary> Jenkins </summary>
 
 <br>
-		
-	1. Difference between Jenkins Declarative vs Scripted Pipeline?
-	2. CI/CD workflow.
-	3. What is the difference between a single Jenkins CI/ CD pipeline and multiple pipelines?
-    4. What are the issues of using a single pipeline vs. multiple pipelines?
-    5. Current Jenkins version.
-    6. Write a Jenkins pipeline script for Terraform deployment.
-    7. Explain the CI/CD workflow you follow and the kind of pipeline you use. How do you define and invoke pipelines in Jenkins?
-    8. What are shared libraries in Jenkins, and how are they written and defined?
-    9. What kind of applications do you deploy using Jenkins pipelines, and what deployment tools do you use?
-    10. If the Jenkins pipeline runs but the build doesn’t happen, what possible issues could be causing it?
-    11. What is the purpose of a webhook, and how is it used in a CI/CD pipeline?
-    12. Which CI/CD tools have you used in production?
-    13. How do you integrate tools like SonarQube, Docker, and Trivy into pipelines?
-    14. How do you trigger a GitHub Actions workflow across repositories?
-    15. What is repository_dispatch, and when would you use it?
-    16. How would you trigger a pipeline in Repo A based on changes in Repo B?
-    17. What branching strategy do you follow, and how do you handle merges to avoid breaking the release branch? If a bug appears in production, what’s your approach to resolving it?
-    18. Describe your typical deployment flow and CI/CD workflow. What stages do you define in your Jenkins pipeline, and how do you ensure full quality checks during deployment?
-    19. How do you use Jenkins shared libraries? Explain their typical structure and how they are integrated into your Jenkinsfiles.
-    20. Explain the end-to-end CI/CD pipeline you have designed. Why did you choose those tools?
-    21. Difference between CI vs CD with real examples from your project
-    22. How do you handle secrets management in pipelines and production?
-    23. Explain Git branching strategies you’ve used in production
-    24. What happens when a build succeeds but deployment fails? How do you debug?
-    25. How do you design a CI/CD pipeline that supports both containerized and serverless deployments?
-    26. What checks would you enforce before allowing a pipeline to deploy to production?
-    27. Describe a scenario where a pipeline rollback is more dangerous than a hotfix.
-    28. Explain a CI/CD pipeline end-to-end
-	29. CI/CD pipeline: built from scratch vs existing setup
-	30. AWS services used for CI/CD
-	31. Key components of a CI/CD pipeline
-    32. Configuration files used in CodeBuild and CodePipeline
-    33. CI/CD tools used apart from AWS
-    34. Explain your CI/CD pipeline flow and how you manage deployments.
-    35. What do you do during Continuous Delivery (CD)?
-    36. How do you manage your pipeline configurations and rollback strategies?
+
+1. Difference between Jenkins Declarative vs Scripted Pipeline?
+2. CI/CD workflow.
+3. What is the difference between a single Jenkins CI/ CD pipeline and multiple pipelines?
+4. What are the issues of using a single pipeline vs. multiple pipelines?
+5. Current Jenkins version.
+6. Write a Jenkins pipeline script for Terraform deployment.
+7. Explain the CI/CD workflow you follow and the kind of pipeline you use. How do you define and invoke pipelines in Jenkins?
+8. What are shared libraries in Jenkins, and how are they written and defined?
+9. What kind of applications do you deploy using Jenkins pipelines, and what deployment tools do you use?
+10. If the Jenkins pipeline runs but the build doesn’t happen, what possible issues could be causing it?
+11. What is the purpose of a webhook, and how is it used in a CI/CD pipeline?
+12. Which CI/CD tools have you used in production?
+13. How do you integrate tools like SonarQube, Docker, and Trivy into pipelines?
+14. How do you trigger a GitHub Actions workflow across repositories?
+15. What is repository_dispatch, and when would you use it?
+16. How would you trigger a pipeline in Repo A based on changes in Repo B?
+17. What branching strategy do you follow, and how do you handle merges to avoid breaking the release branch? If a bug appears in production, what’s your approach to resolving it?
+18. Describe your typical deployment flow and CI/CD workflow. What stages do you define in your Jenkins pipeline, and how do you ensure full quality checks during deployment?
+19. How do you use Jenkins shared libraries? Explain their typical structure and how they are integrated into your Jenkinsfiles.
+20. Explain the end-to-end CI/CD pipeline you have designed. Why did you choose those tools?
+21. Difference between CI vs CD with real examples from your project
+22. How do you handle secrets management in pipelines and production?
+23. Explain Git branching strategies you’ve used in production
+24. What happens when a build succeeds but deployment fails? How do you debug?
+25. How do you design a CI/CD pipeline that supports both containerized and serverless deployments?
+26. What checks would you enforce before allowing a pipeline to deploy to production?
+27. Describe a scenario where a pipeline rollback is more dangerous than a hotfix.
+28. Explain a CI/CD pipeline end-to-end
+29. CI/CD pipeline: built from scratch vs existing setup
+30. AWS services used for CI/CD
+31. Key components of a CI/CD pipeline
+32. Configuration files used in CodeBuild and CodePipeline
+33. CI/CD tools used apart from AWS
+34. Explain your CI/CD pipeline flow and how you manage deployments.
+35. What do you do during Continuous Delivery (CD)?
+36. How do you manage your pipeline configurations and rollback strategies?
 </details>
 
 <details>
@@ -80,18 +80,18 @@
 <summary> Docker </summary>
 	
 <br>
-	
-	1.Entry point vs CMD in a Dockerfile.
-	2. Add vs Copy in Dockerfile.
-    3. Docker lifecycle.
-    4. What are the stages in a Docker image build? Why do we use ENTRYPOINT and CMD instructions?
-    5. Which container registry do you use for storing Docker images?
-    6. Are you aware of security scanning tools? How do you scan Docker images—both during build and at the registry level? Are you using any extensions or tools for image scanning?
-    7. How do you pass environment variables during Docker build commands? What services do you use for storing Docker images?
-    8. Container services in AWS
-    9. Difference between Amazon ECS and Amazon EKS
-    10.When to choose ECS over EKS
-	
+
+1. Entry point vs CMD in a Dockerfile.
+2. Add vs Copy in Dockerfile.
+3. Docker lifecycle.
+4. What are the stages in a Docker image build? Why do we use ENTRYPOINT and CMD instructions?
+5. Which container registry do you use for storing Docker images?
+6. Are you aware of security scanning tools? How do you scan Docker images—both during build and at the registry level? Are you using any extensions or tools for image scanning?
+7. How do you pass environment variables during Docker build commands? What services do you use for storing Docker images?
+8. Container services in AWS
+9. Difference between Amazon ECS and Amazon EKS
+10. When to choose ECS over EKS
+
 </details>
 
 <details>
