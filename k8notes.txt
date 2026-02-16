@@ -1,0 +1,1517 @@
+K8s was built by google.
+
+Kubernetes is a container orchestration technology that manages and deploys thousands of containers in a cluster.
+
+Node : it is a machine (physical or virtual) on which kubernetes is installed and node is a worker machine where containers will launched by kubernetes.
+
+Cluster: It is set of nodes. if one node fails, the application still runs on other nodes.
+
+Master node: We configure a node as a master, because if a node fails, we have to distribute or move the applications to another  node, in that case we need a master, who knows everything and can guide to do all these things.
+
+Kubernetes Components:
+- Api Server:  It is the frontend for kubernetes. The users, management devices, CLI all talk to the api server to interact with the kubernetes cluster. 
+- etcd: It is the distributed reliable key-value store used by kubernetes to store all data used to manage teh cluster. etcd is responsible for implementing logs within the cluster to ensure that there are no conflicts between the master.
+- Kubelet: It is the agent that runs on each node in the cluster. the agent is responsible for making sure that the containers are running as expected in the nodes
+-Container runtime: The container runtime is the underlying software that is used to run containers.
+-Controller: The controllers are brain behind orchestration. they are responsible for noticing and responding, when containers, nodes and endpoints are down. the controllers make decisions to bring up new containers in such cases
+-Scheduler: Scheduler is responsible for distributing work or containers across multiple nodes. It looks for newly created containers and assign them to nodes.
+
+Master: 
+-Kube-apiserver
+-etcd
+-controller
+-scheduler
+
+
+
+Worker:
+-kubelet agent: It is responsible for interacting with master to provide health information of worker node and carry out actions requested by master on the worker nodes. 
+-Container runtime
+-
+
+Pod:
+A pod is a small object single instance of an application. in pod there are two containers, one is application container and another is helper container.
+
+Replication Controller:
+- High Availability
+- Load Balancing and scaling
+
+Replica set: It is the advanced version of replication controller. while creating a replica set, we need to mention selector inside it matchlabels in spec adjacent to template,replicas.
+It manages the existing pods based on the selector.
+
+Deployment:
+- need multiple webservers in production 
+- version upgrade of builds
+- rolling updates
+- rollback
+- pause and resume environment
+- scaling, modifying the resource.
+
+Deployment Strategies
+- Rolling update is the default deployment strategy
+  - if there are 5 pods, 1 pod will be deleted and a new pod will created with latest version- this will continue 1 by 1 until each pod is upgraded.
+
+To upgrade the pods from one version to another version. 
+$: Kubectl rollout status deployment/myapp-deployment
+
+To check the change-cause of the pods and are recorded.
+$: kubectl rollout history deployment/myapp-deployment
+
+To undo the changes means the newer version is not stable so we are rolling back to previous one.
+$: kubectl rollout undo deployment myapp-deployment
+  
+  
+- Recreate
+   - In this all pods deleted at once and new pods will be created - may leads to application down  and requires a owntime.
+    
+$: kubectl set image deploy frontend container_name=nginx:1.3
+
+Networking in Kubernetes
+
+- Services
+  - Kubernetes services enables communication between various kubernetes components within and an outside the applications.
+  - Services enables loose coupling between miceoservices in our application.
+- Types of Services 
+  - NodePort
+  - ClusterIP
+  - LoadBalancer
+
+Voting app with K8s - https://github.com/kodekloudhub/example-voting-app/tree/master/k8s-specifications
+
+Kubernetes on cloud:
+
+Self-hosted/Turnkey solutions:
+- you provision vms
+- you configure VMs
+- You use scripts to deploy cluster
+- You maintain VMs yourself
+- e.g Kubernetes on AWS using Kops or Kubeone  
+
+Hosted Solutions:
+ - Kubernetes as a service
+ - Provider provision vms
+ - Provider installs kubernetes
+ - Provider maintain VMs
+ - e.g GKE(Google container engine)
+ 
+ Google Cloud Account creation - https://cloud.google.com/free/
+ Kubernetes on Google Cloud: https://cloud.google.com/kubernetes-engine/docs/
+ 
+ AWS With Kubernetes
+ 
+ 1. AWS Account 
+ 2. Installing Kubectl CLI
+ 3. EKS Cluster Role
+ 4. IAM Role for node group
+ 5. VPC
+ 6. EC2 Key pair which can be used to SSH to the worker nodes
+ 7. AWS Basics
+ 
+ On-premises
+ 
+ Oracle VirtualBox:  https://www.virtualbox.org/
+
+Vagrant: https://www.vagrantup.com/
+
+Link to download VM images: http://osboxes.org/
+
+Link to kubeadm installation instructions: https://kubernetes.io/docs/setup/independent/install-kubeadm/
+
+Kubernetes Administrator Course:
+
+- HA Deployment
+- Kubernetes Scheduler
+- Logging/ monitoring
+- Application Lifecycle
+- Maintainance
+- Security
+- Troubleshooting
+- Core concepts
+- Demos
+- Coding examples
+
+
+Notes:  https://notes.kodekloud.com/
+
+Kubernetes Architecture:
+
+Master Node: Manage, plan, schedule, Monitor nodes
+
+- etcd cluster: Stores all the information of a cluster
+   - etcd is a datastore that store the data in a key-value format.
+- Kube-Scheduler: A scheduler identifies the right node to place a container based on the container resource requirements and worker node capacity or any other policies or constraints, such as taints, tolerance or node affinity rules  
+- Controller-Manager
+  - Node Controller: It takes care of nodes.they are responsible for onboarding new nodes to the cluster, handling situations where node became unavailable and gets destroyed.
+  - Replication Controller: It ensures that the desired number of containers are running at all times in a replication group.
+- Kube-apiserver :  It is the primary management component for kubernetes. It is responsible for orchestrating all operations with in the cluster. It exposes the kubernetes api which is used by external users to perform management operations on the cluster.
+                    The kube-api server periodically fetches status reports from the kubelet to monitor the status of nodes adnd containers on them.
+- Container Runtime: 
+
+Worker Node: Hosts applications and containers
+- Kubelet:    A kubelet is an agent that runs on each node in a clsuter, it listens for instructions from kube-api server and deploys or destroys containers on the nodes as required.
+- Kube-proxy : communication between the worker nodes be enabled by using the kube-proxy service.
+- Container Run time:
+
+
+Docker Vs Containerd
+
+CRI(Container Runtime Interface): It allows any vendor like docker,rocket to work as a container runtime for kubernetes, as long as they are adhere to OCI standards 
+OCI(Open Container Initiative): 
+- imagespec   :  it specifies how an image should be build.
+- runtimespec  :  it defines the standards on how a container runtime should be developed. 
+
+Docker continued to worked with kubernetes without using containerd, but it runs using dockershim. remaing all work with kubernetes using containerd.
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Etcd:
+What is etcd? 
+It is a distributed reliable key-value store.that is simple, secure and fast.
+Traditionally, databases store the data in a tabular format.
+Key-value Store - it stores a value against a value.
+while installing etcd server, it comes with etcd control client(etcdctl).
+
+To input an entry in etcd, use the below command.
+$: ./etcdctl put key1 value1
+
+To retrive or get_data from etcd, use the below command.
+$: ./etcdctl get key1 
+
+To know more options about etcd
+$: ./etcdctl
+
+etcd in Kubernetes:
+It stores the cluster info like..!
+- nodes
+- pods
+- configs
+- secrets
+- Accounts
+- Roles
+- Bindings 
+- Others
+
+etcd listens on the port: 2379
+
+ETCD - Commands (Optional)
+(Optional) Additional information about ETCDCTL Utility
+
+ETCDCTL is the CLI tool used to interact with ETCD.
+
+ETCDCTL can interact with ETCD Server using 2 API versions - Version 2 and Version 3.  By default its set to use Version 2. Each version has different sets of commands.
+
+For example ETCDCTL version 2 supports the following commands:
+
+etcdctl backup
+etcdctl cluster-health
+etcdctl mk
+etcdctl mkdir
+etcdctl set
+
+
+Whereas the commands are different in version 3
+
+etcdctl snapshot save 
+etcdctl endpoint health
+etcdctl get
+etcdctl put
+
+To set the right version of API set the environment variable ETCDCTL_API command
+
+export ETCDCTL_API=3
+
+
+
+When API version is not set, it is assumed to be set to version 2. And version 3 commands listed above don't work. When API version is set to version 3, version 2 commands listed above don't work.
+
+
+
+Apart from that, you must also specify path to certificate files so that ETCDCTL can authenticate to the ETCD API Server. The certificate files are available in the etcd-master at the following path. We discuss more about certificates in the security section of this course. So don't worry if this looks complex:
+
+--cacert /etc/kubernetes/pki/etcd/ca.crt     
+--cert /etc/kubernetes/pki/etcd/server.crt     
+--key /etc/kubernetes/pki/etcd/server.key
+
+
+So for the commands I showed in the previous video to work you must specify the ETCDCTL API version and path to certificate files. Below is the final form:
+
+
+
+kubectl exec etcd-master -n kube-system -- sh -c "ETCDCTL_API=3 etcdctl get / --prefix --keys-only --limit=10 --cacert /etc/kubernetes/pki/etcd/ca.crt --cert /etc/kubernetes/pki/etcd/server.crt  --key /etc/kubernetes/pki/etcd/server.key" 
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Kube-api server:
+
+- It is the only component in kubernetes which directly coordinate with etcd.
+
+1. Authenticate User - it authenticates users.
+2. Validate request - and validates the client request
+3. Retrieve data - try to retrieve data from etcd.
+4. Update Etcd - if data isn't found inform scheduler to deploy a pod, then scheduler coordinates with kubelet of worker nodes with the help of api server and get the pod deployed then again kubelet updates to api server, api server updates the data in etcd. 
+5. Scheduler
+6. Kubelet
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Kube controller manager
+
+In k8s terms a controller is a process that continuously monitors the state of various components within the system and works towards bringing the whole system to desired state.
+- Node Controller : It is responsible for monitoring the status of the nodes to keep the application running. it does that through the kube-api server.
+  Node monitor Period = 5s  -it check status of the nodes for every 5s.
+  Node Monitor Grace period = 40s. if it stops recieving the heartbeat from the node server, it waits for 40 sec and marked it as unreachable.
+  Pod Eviction time = 5m. it gives it for 5m to came back up. if it doesn't it removes the pod assigned to that node and provisions them in the healthy ones.
+- Replication Controller - It takes care of replicas of the pods that maintains the desired number as mentioned in the replica set.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Kube Scheduler
+
+- It is responsible for scheduling pods and nodes.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+Kubelet :  
+
+It is the whole point of contact of the worker node with the master node.
+It registers the node in the scheduler with the help of api server and loads the conatiners based on scheduling.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+kubeproxy :
+
+Kubeproxy is a process that runs on each node in the kubernetes cluster. It's job is to look for new services and every time a new service is created, it creates appropriate rules to forward those traffic to those services to the backend pod.
+1. Iptables rules
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+POD: 
+A pod is a single instance of an application.
+A pod is the smallest object that you create in kubernetes.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+Relication Controller Commands:
+
+$: kubectl create -f replicaset-definition.yaml
+$: kubectl get replicaset
+$: kubectl delete replicaset myapp-replicaset
+$: kubectl replace -f replicaset-definition.yaml
+$: kubectl scale --replicas=6 -f replicaset-definition.yaml
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+Create an NGINX Pod
+
+kubectl run nginx --image=nginx
+
+Generate POD Manifest YAML file (-o yaml). Don't create it(--dry-run)
+
+kubectl run nginx --image=nginx --dry-run=client -o yaml
+
+Create a deployment
+
+kubectl create deployment --image=nginx nginx
+
+Generate Deployment YAML file (-o yaml). Don't create it(--dry-run)
+
+kubectl create deployment --image=nginx nginx --dry-run=client -o yaml
+
+Generate Deployment YAML file (-o yaml). Don’t create it(–dry-run) and save it to a file.
+
+kubectl create deployment --image=nginx nginx --dry-run=client -o yaml > nginx-deployment.yaml
+
+Make necessary changes to the file (for example, adding more replicas) and then create the deployment.
+
+kubectl create -f nginx-deployment.yaml
+
+
+
+OR
+
+In k8s version 1.19+, we can specify the --replicas option to create a deployment with 4 replicas.
+
+kubectl create deployment --image=nginx nginx --replicas=4 --dry-run=client -o yaml > nginx-deployment.yaml
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Services:
+
+Types:
+- NodePort
+- ClusterIP
+- LoadBalancer
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Namespaces:
+
+Default, kube-system, kube-public are automatically created at the time of creating a cluster.
+If you want to deploy a test,dev and prod environments on the same cluster, in that case we have to use name spaces to isolate the resource/services among them.
+Each of the namespace has defined set of policies that who can do what and also assign quota limits for each of the namespace.
+
+if you want to connect database in backend pod, we have to update in the below format.
+
+mysql.coonect("db.service.dev.svc.cluster.local") 
+                  |         |   |        |
+		 Service Name  namespace|     domain 
+                               subdomain
+To check the pods in a specific name space , you have to mention the namespace unless it shows the pod details in the default namespace
+$: kubectl get pods --namespace=dev
+To set the dev as the default namespace
+$: kubectl config set-context $(kubectl config current-context) --namespace=dev
+then to see the pods in the default name space, you have to mention like below.
+$: kubectl get pods --namespace=default
+To find the DNS Name of blue pod how it is connected to db in dev namespace.
+$: kubectl get svc -n=dev
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Imperative Vs Declarative
+
+Imperative: Means we clearly mention what it should do.
+#Create an NGINX Pod
+$: kubectl run nginx --image=nginx
+#Generate POD Manifest YAML file (-o yaml). Don't create it(--dry-run)
+$: kubectl run nginx --image=nginx --dry-run=client -o yaml
+#Create a deployment
+$: kubectl create deployment --image=nginx nginx
+#Generate Deployment YAML file (-o yaml). Don't create it(--dry-run)
+$: kubectl create deployment --image=nginx nginx --dry-run=client -o yaml
+#Generate Deployment with 4 Replicas
+$: kubectl create deployment nginx --image=nginx --replicas=4
+#You can also scale a deployment using the kubectl scale command.
+$: kubectl scale deployment nginx --replicas=4
+#Another way to do this is to save the YAML definition to a file and modify
+$: kubectl create deployment nginx --image=nginx --dry-run=client -o yaml > nginx-deployment.yaml
+# Create a Service named redis-service of type ClusterIP to expose pod redis on port 6379
+$: kubectl expose pod redis --port=6379 --name redis-service --dry-run=client -o yaml  (This will automatically use the pod's labels as selectors)
+Or
+$: kubectl create service clusterip redis --tcp=6379:6379 --dry-run=client -o yaml (This will not use the pods labels as selectors, instead it will assume selectors as app=redis. You cannot pass in selectors as an option. So it does not work very well if your pod has a different label set. So generate the file and modify the selectors before creating the service)
+ 
+Declarative : Just update the yaml file and then simply use a command kubectl apply -f /path/to/config file.yaml
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Kubectl commands for admin
+
+# It lists all the resources wit version, shortname and kind we used in a cluster.
+$: kubectl api-resource
+
+# Below are the commands used to know about the objects in a cluster.
+$: Kubectl explain pod
+$: kubectl explain pod.spec
+$: kubectl explain pod --recursive  --> it provides an explanation in yaml format.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+reference notes: https://github.com/kodekloudhub/certified-kubernetes-administrator-course
+https://notes.kodekloud.com/
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+Scheduler:
+
+Manual Scheduling:
+
+If a pod went to pending state, then you have to check scheduler pod is available or not if it's not available, then assign the pod to node on yourself.
+kubectl get pods -n kube-system --> need to verify scheduler pod is available in kube-system namespace
+And to schedule node manually use the below options.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+  labels:
+    env: dev
+spec:
+  nodeName: node01
+  containers:
+    - image: nginx
+      name: nginx
+      ports:
+      - containerPort: 80
+----------------------------------------------------------------------------------------------------------------
+Labels and Selectors:
+
+Labels and Selectors are used to group the resources based on the label for the specific application or resource.
+Annotations are used to record other details for informatory purpose like name, build version, phone number ...
+$: kubectl get all --selector="env=dev, bu=finance" --no-headers | wc -l
+
+Taints and Tolerations:
+Taints are set on nodes.
+Tolerations are set on pods.
+Syntax:
+$: kubectl taint nodes node-name key=value:taint-effect
+There are three types of taint-effects
+1. No Schedule
+2. Prefer No Schedule
+3. No execute
+
+$: Kubectl taint nodes node1 app=myapp:NoSchedule
+$: vi pod.yaml
+spec:
+  containers:
+  tolerations:
+   - key: "app"
+     operator: "Equal"
+	 value: "myapp"
+	 effect: "NoSchedule"
+$: Kubectl describe node kubemaster | grep Taint	
+
+Node Selector:
+It is used to select a node to deploy our app based on the node label
+In Nodeselector we can't use expressions like "OR" "IN" "NOT" "EXISTS"
+
+Node Affinity:
+It is the advanced feature of node selector. In node affinity we can use expressions.
+There are two types of node affinity:
+1. Available
+requiredDuringSchedulingIgnoredDuringExecution
+PreferredDuringSchedulingIgnoredDuringExecution
+
+2. Planned
+requiredDuringSchedulingRequiredDuringExecution
+----------------------------------------------------------------------------------------------------------------------------------------------
+
+Resource Limits
+OOMKilled - Out Of Memory Killed - it will raise when a pod reuires more RAM than the mentioned limits, at that stage pod went down due to this error.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------
+Daemon Sets
+It runs one copy of pod on each node in your cluster.
+usecases:
+- Monitoring Solution
+- log viewer
+------------------------------------------------------------------------------------------------------------------------------------------------
+Static Pods
+
+Static pods are the pods deployed by the kubelet without any kubeapi server intervention.
+We can't create any services except pods by placing a file in the respected directory. (/etc/kubernetes/manifests)
+StaticPods are used to deploy Control plane components as static pods
+To find the static pod path.
+ps -ef | grep /usr/bin/kubelet
+grep -i staticpod /var/lib/kubelet/config.yaml
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+Priority Classes
+
+Priority Classes help us to define priorities for different workloads, so that higher priority workloads always get priority than lower priority ones.
+The higher priority pod can't be scheduled, then scheduler may terminate the lower priority workloads to make the higher priority workload to be scheduled.
+priority defines in a range of 
+APPS -->  1,000,000,000 to -2,147,483,648
+System Components --> 2,000,000,000 to 1,000,000,000
+
+Listing Priority Classes:
+Kubectl get priorityclass
+
+Compare Priority class on both pods
+kubectl get pods -o custom-columns="NAME:.metadata.name,PRIORITY:.spec.priorityClassName"
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+Multiple Schedulers
+It's nothing but creating our own scheduler instead of using the default one.
+
+Scheduler Profiles:
+- Scheduling Queue
+  plugins:
+   - PrioritySort
+  Extension Points:
+   - queueSort  
+- Filtering
+  plugins:
+   - NodeResourceFit
+   - NodeName
+   - Node unschedulable
+   - Taint toleration
+   - NodePorts
+   - NodeAffinity
+  Extension Points:
+   - prefilter
+   - filter
+   - postfilter   
+- Scoring
+ Plugins:
+  - NodeResourcesFit
+  - ImageLocality
+  - Taint toleration
+  - NodeAffinity
+ Extension Points:
+   - prescore
+   - score
+   - reserve
+- Binding
+ plugins
+  - DefaultBinder
+ Extension Points:
+   - permit
+   - prebind
+   - postbind  
+
+Reference:
+https://github.com/kubernetes/community/blob/master/contributors/devel/sig-scheduling/scheduling_code_hierarchy_overview.md
+https://kubernetes.io/blog/2017/03/advanced-scheduling-in-kubernetes/
+https://jvns.ca/blog/2017/07/27/how-does-the-kubernetes-scheduler-work/
+https://stackoverflow.com/questions/28857993/how-does-kubernetes-scheduler-work
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+Admission Controllers
+
+Kubelet --> kube-apiserver --> create pod
+Kubelet --> Authentication --> Authorization --> create pod
+kubelet --> Authentication --> Authorization --> admission Controllers --> Create pod
+
+Authentication and Authorization enabled based on Role based access control
+
+Using Api server we can do below things
+- can list/create/delete PODs/Deployments/Services/.....
+- can create pods named blue or orange
+- can create pods within a namespace
+
+using Admission Controllers
+- Only permit images from certain registry
+- Do not permit runAsroot user
+- Only permit certain capabilities
+- pod always has labels
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Validating and Mutuating Admission Controllers
+
+--------------------------------------------------------------------------------------------------------------------------------------------------
+Logging and Monitoring
+
+1 Metrics server per kubernetes cluster
+Metrics server retrieves the metrics from each node and pods aggregates them and store them in memory not on disk.
+kubernetes runs an agent on each node known as kubelet, it contains a sub components like cAdvisor (Container Advisor) that is responsible for retrieving performance metrics from pod and exposing them through kubelet api to make the metrics available for metrics server. 
+
+Metrics server installation:
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+$: Kubectl top node
+$: kubectl top pod    
+
+Managing Application Logs
+
+$: docker logs -f container_id
+$: kubectl logs -f pod_name
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+Rolling Updates and Roll backs
+
+Create:
+$: Kubectl create -f deployment-definition.yaml
+
+Get:
+$: kubectl get deployments
+
+Update:
+$: kubectl apply -f deployment-definition.yaml
+$: Kubectl set image deployment/myapp-deployment nginx=nginx:1.9.1
+
+Status:
+$: kubectl rollout status deployment/myapp-deployment
+$: kubectl rollout history deployment/myapp-deployment
+
+Rollback:
+$: kubectl rollout undo deployment/myapp-deployment
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+Configure Applications
+Configuring applications comprises of understanding the following concepts:
+
+Configuring Command and Arguments on applications
+
+Configuring Environment Variables
+
+Configuring Secrets
+
+In docker we use Entrypoint for command and CMD for arguments, which are nothing but values.
+In kubernetes we use command: ["sleep2.0"] for command and args: ["10"] for passing the arguments.
+
+```bash
+containers:
+- image: ubuntu-sleeper
+  name: ubuntu-sleeper
+  command: ["sleep"]
+  args: ["10"]
+  
+Environment Variables:
+Usually we hardcode the variable values directly in the manifest file is not a best practice.So we are using the config map and secret keys to pass the values to variables.
+
+Kubectl replace --force -f /tmp/webapp-pod.yaml -- this command is used to update the things in a running pod, so that pod will be deleted and replaced with new one.
+
+Config Maps
+- These are used to pass the configuration data in the form of key value pair in kubernetes.
+- There are two phases involved in configuring config maps.
+  1. create Configmap
+  2. Inject into pod.
+  
+  Imperative way of using the config maps.
+  $: kubectl create configmap <config-name> \ --from-literal=<key>=<value>
+  $: kubectl create config app-config \ --from-literal=APP_COLOR=blue\ --from-literal=APP_MOD=prod
+  
+  $: kubectl create configmap <config-name> \ --from-file=<path-to-file>
+  $: kubectl create configmap app-config \ --from-file=app_config.properties
+  
+  Declarative way:
+  1. create a file with root components like, apiVersion,kind,metadata,data
+  $: kubectl apply -f filename.yaml
+  
+Secrets:
+- Secrets are used to store sensitive information, like passwords, keys.
+- There are two phases involved in configuring config maps.
+  1. create Configmap
+  2. Inject into pod.
+
+ Imperative way of using the config maps.
+  $: kubectl create secret generic <secret-name> \ --from-literal=<key>=<value>
+  $: kubectl create secret generic app-secret \ --from-literal=DB_HOST=mysql\ --from-literal=DB_USER=root \ --from-literal=DB_Password=passwd
+  
+  $: kubectl create secret generic <secret-name> \ --from-file=<path-to-file>
+  $: kubectl create secret generic app-secret \ --from-file=app_secret.properties
+  
+   Declarative way:
+  1. create a file with root components like, apiVersion,kind,metadata,data
+  $: kubectl apply -f filename.yaml
+  
+  Encode the values before adding them in secrets.
+  $: echo -n "mysql" | base64
+  
+   Decode the values before adding them in secrets.
+  $: echo -n "mysql" | base64 --decode
+  
+ Encrypting Secret data at rest
+
+Enabling Encryption at Rest for Secrets so they are stored encrypted in ETCD.  
+  
+  ---------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  Dive deep into the world of Kubernetes security with our comprehensive guide to Secret Store CSI Driver.
+
+https://www.youtube.com/watch?v=MTnQW9MxnRI
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Multi container pods
+
+There are three design patterns in Multi-container pods.
+1. Co-loccated containers  - In this we can't specify which container starts first, because both services depend on each other.
+2. Regular Init containers - The init container does this job and ends, post that main app container will run.
+3. Sidecar containers - The sidecar container initially runs and always be in running state, after that main app container will start.
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+Self Healing Applications
+Kubernetes supports self-healing applications through ReplicaSets and Replication Controllers. The replication controller helps in ensuring that a POD is re-created automatically when the application within the POD crashes. It helps in ensuring enough replicas of the application are running at all times.
+
+Kubernetes provides additional support to check the health of applications running within PODs and take necessary actions through Liveness and Readiness Probes. However these are not required for the CKA exam and as such they are not covered here. These are topics for the Certified Kubernetes Application Developers (CKAD) exam and are covered in the CKAD course.
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+Autoscaling 
+- Horizontal pod autoscaling
+- Vertical pod autoscaling
+
+Horizontal pod autoscaling means adding more instances or pods.
+Manual: we use kubectl scale
+Automated: we use HPA(Horizontal pod autoscaler)
+ - It continuosly observe metrics of pods, where we manually observe using top command.
+ - It automatically adds pods or delete pods in deployment or replicaset.
+ - It balances thresholds
+ - Tracks multiple metrics
+ 
+ Imperative Way:
+ $: Kubectl autoscale deployment my-app \ --cpu-percent=50 --min=1 --max=10
+  Resource requests, replicas ---> HPA ----> Metrics server
+  The above command makes sure if cpu percentage of existing pod reaches 50%, then it will scale the pods, and we set min pods =1, max pods = 10.
+ Declarative Way:
+ 
+
+Vertical pod autoscaling means increasing the compute resources for respective pods.
+Manual: we use kubectl edit
+Automated: we use VPA(Vertical pod autoscaler)
+ - It Observes metrics
+ - Adds pod resources
+ - Balance thresholds
+ 
+ VPA doesn't have kubernetes built-in; hence, we must deploy it.
+ 
+ Metrics server ---> VPA Recommender --> it recommends only changes.
+ VPA Recommender --> VPA Updater --> the updater detects pods subotimal resources and evicts(terminate) them if an update is needed.
+ VPA Admission Controller --> Itv intervenes the pod creation process and uses the recommendations from the recommender and apply the recommended CPU and memory values at start up.
+
+Key differences: 
+
+| Feature | VPA(Vertical Scaling) | HPA(Horizontal Scaling ) |
+|--------|----------------|------------------------|
+| scaling method | Increases cpu and memory of existing pods | adds/removes pods based on load |
+| Pod Behaviour | Restarts pods to apply new resource values | Keeps existing pods running |
+| Handles Traffic Spikes | No, scaling requires a pod restarts | Yes, instantly adds more pods |
+| OPtimizes Costs? | Prevents over provisioning of CPU/Memory | Avoids unnecessary idle pods |
+| Best for  | Stateful Workloads, CPU/Memory- heavy apps (DB, ML Workloads) | Web apps, microservices,stateless Services |
+
+
+Scaling cluster infra
+Manual: using kubeadm join
+Automated: we use cluster autoscaler
+
+InPlace resize of pods
+
+- Only CPU and memory resources can be changed
+- Pod QoS Class cannot change 
+- Init Containers and Ephermal Containers cannot be resized. 
+- Resource requests and limits cannot be removed once set.
+- A container's memory limit can't be set below it's current usage; if a container is put in this state, the resize remains "InProgress" until the desired memory limit is feasible.
+ 
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+Cluster Maintainance:
+
+OS Upgrades:
+1. $: Kubectl drain node-1 --> it simply marks the node-1 as unscheduled and terminate the pods running in it and recreate them in another nodes.
+2. $: kubectl uncordon node-1 --> once upgrade is done, we need to make it schedulable, so we use this command to bring the pod into production.
+3. $: Kubectl cordon node-1 -- > it simply marks the node-1 as unschedulable, but pods are still running in this pod be as it is state. 
+pod-eviction timeout is 5min --> it is the time when pod is not available, once limit is reached the pod will be deployed in another node.
+
+References:
+
+https://kubernetes.io/docs/concepts/overview/kubernetes-api/
+
+Here is a link to kubernetes documentation if you want to learn more about this topic (You don't need it for the exam though):
+
+https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md
+
+https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api_changes.md
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+Kubernetes Components have their seperate versions.
+
+Core Control Plane Components.
+1. kube-apiserver         - version is X
+2. Controller-Manager     - version can be X or X-1
+3. kube-scheduler         - Version can be X or X-1
+4. kubelet                - Version can be X, X-1, X-2
+5. kube-proxy             - Version can be X, X-1, X-2
+6. Kubectl                - Version can be X+1, X, X-1 
+External Componenets
+7. etcd Cluster
+8. CoreDNS
+
+If master node goes, application won't be affected unless there is a pod failure. But we can't access the cluster to perform kubect command.
+There are 3 strategis to upgrade the worker nodes.
+S-1: upgrade all the nodes at a time, required downtime.
+S-2: Upgrade 1 by 1 node 
+s-3: Deploy a new node with new version and join it in cluster and remove the terminate the old node.
+
+Master Node Upgrade:
+
+--> $: Kubeadm upgrade plan  --> it shows the current version and the upgradable version, command to upgrade, manually upgradable components.
+Before upgrade the cluster, you must upgrade the kubeadm
+--> $: apt-get upgrade -y kubeadm=1.12.0-00
+--> $: kubeadm upgrade apply v1.12.0
+--> $: kubectl get nodes
+--> $: apt-get upgrade -y kubelet=1.12.0.00
+--> $: systemctl restart kubelet
+--> $: Kubectl get nodes.
+
+Worker node upgrade:
+
+--> $: kubectl drain node-1
+--->$: apt-get upgrade -y kubeadm=1.12.00-00
+---> $: apt-get upgrade -y kubelet=1.12.0-00
+--> $: kubeadm upgrade node config --kubelet-version v1.12.0
+--> $: Systemctl restart kubelet
+--> $: kubectl uncordon node-1
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Cluster Upgrade:
+
+$: kubectl get nodes --> to know how many nodes are there in cluster.
+$: cat /etc/*se  --> To know about the os version details.
+$: Replace the apt repository
+# Open the file that defines the Kubernetes apt repository using a text editor of your choice:
+$: nano /etc/apt/sources.list.d/kubernetes.list
+# You should see a single line with the URL that contains your current Kubernetes minor version. For example, if you're using v1.33, you should see this:
+$: deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /
+# Change the version in the URL to the next available minor release, for example:
+$: deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /
+# Save the file and exit your text editor. Continue following the relevant upgrade instructions.
+
+Replace the apt repository definition so that apt points to the new repository instead of the Google-hosted repository. Make sure to replace the Kubernetes minor version in the command below with the minor version that you're currently using:
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+Download the public signing key for the Kubernetes package repositories. The same signing key is used for all repositories, so you can disregard the version in the URL:
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.34/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+Update the apt package index:
+sudo apt-get update
+
+To see which version is available we use the below command.
+$: sudo apt-cache madison kubeadm
+
+# replace x in 1.34.x-* with the latest patch version based on above command.
+sudo apt-mark unhold kubeadm && \
+sudo apt-get update && sudo apt-get install -y kubeadm='1.34.0-1.1' && \
+sudo apt-mark hold kubeadm
+
+# kubeadm version
+
+To check what are the things will upgrade automatically with kubeadm and what the things we need to update manually.
+
+$: sudo kubeadm upgrade plan
+
+Choose a version to upgrade to, and run the appropriate command. For example:
+$: # replace x with the patch version you picked for this upgrade
+sudo kubeadm upgrade apply v1.34.x
+
+sudo apt-mark unhold kubelet kubectl && \
+sudo apt-get update && sudo apt-get install -y kubelet='1.34.0-1.1' kubectl='1.34.0-1.1' && \
+sudo apt-mark hold kubelet kubectl
+
+
+
+
+$: sudo apt-cache madison kubeadm
+
+---------------------------------------
+To seamlessly transition from Kubernetes v1.33 to v1.34 and gain access to the packages specific to the desired Kubernetes minor version, follow these essential steps during the upgrade process. This ensures that your environment is appropriately configured and aligned with the features and improvements introduced in Kubernetes v1.33.
+
+On the controlplane node:
+
+Use any text editor you prefer to open the file that defines the Kubernetes apt repository.
+
+vim /etc/apt/sources.list.d/kubernetes.list
+Update the version in the URL to the next available minor release, i.e v1.34.
+
+deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /
+After making changes, save the file and exit from your text editor. Proceed with the next instruction.
+
+apt update
+
+apt-cache madison kubeadm
+Based on the version information displayed by apt-cache madison, it indicates that for Kubernetes version 1.34.0, the available package version is 1.34.0-1.1. Therefore, to install kubeadm for Kubernetes v1.34.0, use the following command:
+
+apt-get install kubeadm=1.34.0-1.1
+Run the following command to upgrade the Kubernetes cluster.
+
+kubeadm upgrade plan v1.34.0
+
+kubeadm upgrade apply v1.34.0
+Note that the above steps can take a few minutes to complete.
+
+Now, upgrade the Kubelet version. Also, mark the node (in this case, the "controlplane" node) as schedulable.
+
+apt-get install kubelet=1.34.0-1.1
+Run the following commands to refresh the systemd configuration and apply changes to the Kubelet service:
+
+systemctl daemon-reload
+
+systemctl restart kubelet
+
+---------------------------------------------------------------------------
+Worker node update:
+
+On the node01 node, run the following commands:
+
+If you are on the controlplane node, run ssh node01 to log in to the node01.
+
+Use any text editor you prefer to open the file that defines the Kubernetes apt repository.
+
+vim /etc/apt/sources.list.d/kubernetes.list
+Update the version in the URL to the next available minor release, i.e v1.34.
+
+deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /
+After making changes, save the file and exit from your text editor. Proceed with the next instruction.
+
+apt update
+
+apt-cache madison kubeadm
+Based on the version information displayed by apt-cache madison, it indicates that for Kubernetes version 1.34.0, the available package version is 1.34.0-1.1. Therefore, to install kubeadm for Kubernetes v1.34.0, use the following command:
+
+apt-get install kubeadm=1.34.0-1.1
+
+# Upgrade the node 
+kubeadm upgrade node
+Now, upgrade the Kubelet version.
+
+apt-get install kubelet=1.34.0-1.1
+Run the following commands to refresh the systemd configuration and apply changes to the Kubelet service:
+
+systemctl daemon-reload
+
+systemctl restart kubelet
+Type exit or logout or enter CTRL + d to go back to the controlplane node.
+
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Backup & Restore
+
+Backup Candidates
+1. Resource Configuration - it is possible only if we use declarative approach.
+- $: kubectl get all -all-namespaces -o yaml > all-deploy-services.yaml
+Velero or ark can be used to take backup of the k8s cluster using kube-api-server.
+
+2. etcd cluster
+- $: etcd.service
+We can take backup using our local backup tool and the path is /etc/etcd.
+etcd also comes with a built in snapshot solution.
+- $: etcdctl \ snapshot save snapshot.db
+then snapshot file will be created.
+
+to View the status of snapshot
+
+$: etcdctl \ snapshot status snapshot.db
+
+To restore cluster from snapshot of etcd
+Step 1: stop kube-api server
+systemctl stop kube-apiserver
+Step2: use etcd command to restore.
+$: etcdctl \ snapshot restore snapshot.db \ --data-dir /var/lib/etcd-from-backupfile
+Step3: systemctl daemon-reload
+Step4: systemctl restart etcd
+Step5: systemctl start kube-apiserver
+
+
+ 
+3. Persistent Volumes
+
+----------------------------------------------------------------------------------------------------------------
+working with etcdctl and etcdutl
+
+WORKING WITH ETCDCTL & ETCDUTL
+etcdctl is a command line client for etcd.
+In all our Kubernetes hands-on labs, the ETCD key-value database is deployed as a static pod on the master. The version used is v3.
+
+To make use of etcdctl for tasks such as backup, verify it is running on API version 3.x:
+
+etcdctl version
+Example:
+
+controlplane ~ ➜  etcdctl version
+etcdctl version: 3.5.16
+API version: 3.5
+Backing Up ETCD
+Using etcdctl (Snapshot-based Backup)
+To take a snapshot from a running etcd server, use:
+
+ETCDCTL_API=3 etcdctl \
+  --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key \
+  snapshot save /backup/etcd-snapshot.db
+Required Options
+--endpoints points to the etcd server (default: localhost:2379)
+
+--cacert path to the CA cert
+
+--cert path to the client cert
+
+--key path to the client key
+
+Using etcdutl (File-based Backup)
+For offline file-level backup of the data directory:
+
+etcdutl backup \
+  --data-dir /var/lib/etcd \
+  --backup-dir /backup/etcd-backup
+This copies the etcd backend database and WAL files to the target location.
+
+Checking Snapshot Status
+You can inspect the metadata of a snapshot file using:
+
+etcdctl snapshot status /backup/etcd-snapshot.db \
+  --write-out=table
+This shows details like size, revision, hash, total keys, etc. It is helpful to verify snapshot integrity before restore.
+
+Restoring ETCD
+Using etcdutl
+To restore a snapshot to a new data directory:
+
+etcdutl snapshot restore /backup/etcd-snapshot.db \
+  --data-dir /var/lib/etcd-restored
+To use a backup made with etcdutl backup, simply copy the backup contents back into /var/lib/etcd and restart etcd.
+
+Notes
+etcdctl snapshot save is used for creating .db snapshots from live etcd clusters.
+
+etcdctl snapshot status provides metadata information about the snapshot file.
+
+etcdutl snapshot restore is used to restore a .db snapshot file.
+
+etcdutl backup performs a raw file-level copy of etcd’s data and WAL files without needing etcd to be running.
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+To create a snapshot of etcd.
+etcdctl --endpoints=https://[127.0.0.1]:2379 \
+--cacert=/etc/kubernetes/pki/etcd/ca.crt \
+--cert=/etc/kubernetes/pki/etcd/server.crt \
+--key=/etc/kubernetes/pki/etcd/server.key \
+snapshot save /opt/snapshot-pre-boot.db
+
+Complete Restore Process
+
+Step 1: Stop the kube-apiserver
+
+Execute the following commands:
+
+mv /etc/kubernetes/manifests/kube-apiserver.yaml /tmp/
+sleep 30
+Step 2: Restore the etcd snapshot
+
+Run the command below to restore the snapshot:
+
+etcdutl snapshot restore /opt/snapshot-pre-boot.db --data-dir /var/lib/etcd-from-backup
+Expected output:
+
+2025-04-24T09:38:07Z    info    snapshot/v3_snapshot.go:265     restoring snapshot
+2025-04-24T09:38:07Z    info    membership/store.go:141 Trimming membership information from the backend...
+2025-04-24T09:38:07Z    info    membership/cluster.go:421       added member
+2025-04-24T09:38:07Z    info    snapshot/v3_snapshot.go:293     restored snapshot
+Step 3: Update the etcd configuration
+
+Open the etcd configuration file for editing:
+
+vi /etc/kubernetes/manifests/etcd.yaml
+Modify the volumes section as follows:
+
+From:
+
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/pki/etcd
+      type: DirectoryOrCreate
+    name: etcd-certs
+  - hostPath:
+      path: /var/lib/etcd                    # OLD directory
+      type: DirectoryOrCreate
+    name: etcd-data
+To:
+
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/pki/etcd
+      type: DirectoryOrCreate
+    name: etcd-certs
+  - hostPath:
+      path: /var/lib/etcd-from-backup        # NEW restored directory
+      type: DirectoryOrCreate
+    name: etcd-data
+Upon saving this file, the etcd pod will restart automatically due to static pod behavior.
+
+Step 4: Restart the kube-apiserver
+
+Move the kube-apiserver manifest back to its original location:
+
+mv /tmp/kube-apiserver.yaml /etc/kubernetes/manifests/
+Wait for 60 seconds to allow the kube-apiserver to start.
+
+Step 5: Restart other control plane components
+
+Execute the following commands to restart additional components:
+
+# Restart kube-controller-manager
+mv /etc/kubernetes/manifests/kube-controller-manager.yaml /tmp/
+sleep 20
+mv /tmp/kube-controller-manager.yaml /etc/kubernetes/manifests/
+
+# Restart kube-scheduler
+mv /etc/kubernetes/manifests/kube-scheduler.yaml /tmp/
+sleep 20
+mv /tmp/kube-scheduler.yaml /etc/kubernetes/manifests/
+
+# Restart kubelet
+systemctl restart kubelet
+Step 6: Monitor the restart process
+
+Use the following command to monitor the restart:
+
+watch crictl ps
+Key indicators to observe:
+
+All components should show STATUS = Running
+The entire process should take approximately 2-3 minutes.
+Step 7: Verify the restore
+
+Run the commands below to check resource status across all namespaces:
+
+# Check all resources across all namespaces
+kubectl get deployments,services --all-namespaces
+
+# Verify specific resources if needed
+kubectl get pods --all-namespaces
+kubectl get nodes
+You should now observe all the resources that existed at the time the snapshot was taken.
+
+
+  Reference:
+  
+  https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/#backing-up-an-etcd-cluster
+
+https://github.com/etcd-io/website/blob/main/content/en/docs/v3.5/op-guide/recovery.md
+
+https://www.youtube.com/watch?v=qRPNuT080Hk
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Security:
+
+Security Primitives:
+
+To secure hosts:
+- Password based authentication disabled.
+- SSH Key authentication be enabled.
+
+Kube- apiserver
+We have to take decisions based on the below.
+i. who can access?  -- IT is defined by Authentication.
+Different ways to authenticate the apiserver.
+- Static token file
+- certificates
+-external authentication providers (LDAP)
+- Service accounts. 
+
+2. what can they do?    -- It is defined by authorization mechanisms.
+- RBAC Authorization 
+- ABAC Authorization (Attribute based access control)
+- Node Authorization
+- Webhook mode
+
+Authentication:  
+- admins can access cluster, -  developers can access cluster, - endusers access the applications, - thirdparty apps /bots can access the cluster.
+To secure cluster among them.
+ Users: Admins, Developers
+ Service Accounts: Bots/third party apps
+ 
+ - Kubernetes does not manage user accounts natively, so it relies on external source like a file with user details, or a certificates, or a third party identity service like LDAP.
+ 
+ - kubernetes can manage and create service accounts using kubernetes api
+   $: kubectl create serviceaccount sa1
+   $: kubectl get serviceaccount
+
+User accounts:
+
+$: request related to api server through command line kubectl or curl it first reaches api server and apiserver authenticates it using the 3 mechanisms.
+
+request --> apiserver --> Authentication (Static Token File, Certificates, Identity Services)
+
+Static Token File --> need to pass the token file to api server as --token-auth-fileuser-token-details.csv
+$: curl -v -k https://master-node-ip:6443/api/v1/pods --header "Authorization: Bearer <token-id>.
+$: This is not a recommended authorization mechanism as it's not secure..!
+
+TLS Cerificates (Prerequisites):
+
+TLS Basics:
+
+What is a Certificate?
+A Certificate is used to gurantee trust between two parties during transaction.
+There are 3 types of certificates.
+Root certificate - configured on the CA(Certificate Authority) provider
+Client Certificates - Configured on the client side
+Server Certifcates -  Configured on the server end (pem, private key)
+
+$: ssh-keygen is used to generate public and private keys.
+
+Server Certificates for servers in k8s.
+
+kube-apiserver: apiserver.crt, apiserver.key
+etcd server: etcdserver.crt, etcdserver.key
+kubelet server: kubelet.crt, kubelet.key 
+
+client certifictes for clients
+Admin : admin.crt, admin.key
+kube-scheduler: scheduler.crt, scheduler.key
+kubecontroller manager: controller-manager.crt, controller-manager.key.
+kube-proxy: kube-proxy.crt, kube-proxy.key
+apiserver: apiserver-kubelet-client.crt, apiserver-kubelet-client.key.
+apiserver: apiserver-etcd-client.crt, apiserver-etcd-client.key
+kubelet: kubelet-client.crt, kubelet-client.key 
+
+TLS Certificates- Generating Certificates.
+
+Different tools to generate certificates.
+- EASYRSA
+- OPENSSL
+- CFSSL
+
+Certificate Authority(CA)
+
+Generate Keys : ca.key --> $: openssl genrsa -out ca.key 2048
+Certificate Signing Request : ca.csr --> $: openssl req -new -key ca.key -subj "/CN=KUBERNETES-CA" -out ca.csr
+Sign Cerificates:  ca.crt --> $: openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt 
+
+Admin User:
+
+Generate Keys : admin.key --> $: openssl genrsa -out admin.key 2048
+Certificate Signing Request : admin.csr --> $: openssl req -new -key admin.key -subj "/CN=kube-admin/OU=system:masters" -out admin.csr
+Sign Cerificates:  ca.crt --> $: openssl x509 -req -in admin.csr -CA ca.crt -CAkey ca.key -out admin.crt
+
+In the same way we have to create certificates for scheduler, controller-manager, kube-proxy, ... for all client certificates.	
+
+
+
+
+
+TLS Certificates - Viewing Cerificate details
+
+I have uploaded the Kubernetes Certificate Health Check Spreadsheet here:
+
+https://github.com/mmumshad/kubernetes-the-hard-way/tree/master/tools
+
+To View Cerificate details:  --> $: openssl x509  -in /etc/kubernetes/pki/ca.crt -text -noout
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Certificate API
+
+
+Create a CertificateSigningRequest object with the name akshay with the contents of the akshay.csr file
+
+
+As of kubernetes 1.19, the API to use for CSR is certificates.k8s.io/v1.
+
+Please note that an additional field called signerName should also be added when creating CSR. For client authentication to the API server we will use the built-in signer kubernetes.io/kube-apiserver-client.
+
+Use this command to generate the base64 encoded format as following: -
+
+cat akshay.csr | base64 -w 0
+Finally, save the below YAML in a file and create a CSR name akshay as follows: -
+
+---
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: akshay
+spec:
+  groups:
+  - system:authenticated
+  request: <Paste the base64 encoded value of the CSR file>
+  signerName: kubernetes.io/kube-apiserver-client
+  usages:
+  - client auth
+
+
+kubectl apply -f akshay-csr.yaml
+
+---------------------------------------------------------------------------------------------------------------------------
+
+Kubeconfig file
+
+---------------------------------------------
+
+api groups:
+
+curl https://control_node_ip:6443/api
+
+/api - core group - /v1 - namespaces, pods, rc, nodes, pvc, services, secrets, PV, endpoints, events, bindings, configmaps
+/version - To View the version of the cluster
+/metrics - monitor the health of the cluster
+/healthz - monitor the health of the cluster
+/apis  - Named groups  -- 
+/apps  - /v1 - resources (/deployments, /replicasets, /statefulsets ) - using resources we can do verbs( list, get, craete, delete, update, watch) 
+/extensions 
+/networking.k8s.io - /v1 - /networkpolicies 
+/storage.k8s.io 
+/certificates.k8s.io - /v1 - /certificatesigningrequests
+
+/logs - Integrating with third party logging application.
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+authorization:
+
+- Node
+- ABAC (Attribute based access contro) - it is hard to maintain as we need to restart api server everytime when specifying an access using this method.
+- RBAC (Role Based Access Control)
+- Webhook -  it uses the third party tools like open policiy agent, to check the user is requesting access, should i allow?
+
+Role Based ACCESS Controls
+
+Viewing RBAC
+
+roles and rolebindigs are created in namespaces.
+
+$: Kubectl get roles
+$: kubectl get rolebindings
+$: kubectl describe role developer
+$: kubectl describe rolebinding devuser-developer-binding
+
+Checking Access:
+
+$: kubectl auth can-i create deploymnets
+$: kubectl auth can-i delete nodes
+$: kubectl auth can-i create deploymnets --as dev-user
+$: kubectl auth can-i create pods --as dev-user --namespace test
+------------------------------------------------------------------------------------------------------------------------------
+Cluster Roles & Cluster Rolebindings
+
+To know resources are going to be created under namespace or not.
+
+$: Kubectl api-resources --namespaced=true
+$: kubectl api-resources --namespaced=false
+
+  
+  Namespaced - (pods, deployments, jobs, replicasets, roles, rolebindings, services, secrets, configmaps, PVC)
+  Cluster Scoped -(nodes, PV, clusterroles, clusterrolebindings, certificatesigningrequests, namespaces)
+  
+  
+ ----------------------------------------------------------------------------------------------------------------------------
+ Service Account:
+ 
+ Service accounts are used by other applications or services to interact with kubernetes
+ Tokens are created for service account to prove identity.
+ to create a new service account 
+   $: Kubectl create serviceaccount dashboard-sa 
+   
+ To use the service account from an external application (CICD , monitoring tool)
+  Create a token
+   $: kubectl create token dashboard-sa --duration 2h
+   
+ Every namespace has a default service account
+the default service account is automatically attached to the pod on creation.
+To attach a service account to a pod use serviceAccountName field 
+When  a service account is attached to a pod,kubernetes:
+ - Automatically creates a token and mounts as a projected volume.
+ - Automatically rotates token.
+ - Automatically expires token when the pod is deleted.
+ 
+ 
+ Third party applications like jenkins use service accounts associated wit tokens for authentication, here it uses tokens.
+ 
+ 
+ 
+ $: Kubectl get serviceaccount
+ $ kubectl describe serviceaccount default
+ 
+ Kubernetes automatically creates a projected volume and the service account mounted to projected volume automatically, there we can see the token details
+path for token: /var/run/secrets/kubernetes.io/serviceaccount
+$: Kubectl create serviceaccount dashboard-sa 
+$: kubectl get serviceaccount
+$: kubectl describe serviceaccount dashboard-sa
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+Image Security:
+
+docker-registry is a built-in secret to store the docker logins.
+$: kubectl create secret docker-registry regcred \
+   --docker-server=       \
+   --docker-username=     \
+   --docker-password=     \
+   --docker-email=      
+   
+Security in Docker
+
+The root user in docker container doesn't have full privilages as a user in linux, there are limited to linux capabilities.
+If we want to add privileges use the below command.
+$: docker run --cap-add MAC_ADMIN ubuntu
+If we want to drop privilages use the below command.
+$: docker run --cap-drop KILL ubuntu
+If we want to enable all privilages.
+$: docker run --privileged ubuntu
+
+Secury in kubernetes
+
+spec:
+  securityContext:
+    runAsUser: 1000
+	capabilities:
+	  add: ["MAC_ADMIN"]
+  containers: 
+
+Above is enabling the capabilities over the pod.
+-------------------------------------------------------------
+
+What is a custom resource?
+
+It is an extension of the Kubernetes API that is not necessarily available in a default Kubernetes installation.
+
+--------------------------------------------------------------------
+
+Docker Storage 
+
+It consists of 
+1. Storage Drivers
+2. Volume Drivers
+
+File Structure
+/var/lib/docker
+ - aufs
+ - containers
+ - images
+ - volumes
+
+Docker Layered Architecture:
+
+DockerFile
+FROM Ubuntu
+RUN apt-get update && apt-get -y install python
+RUN pip install flask flask-mysql
+COPY . /opt/source-code
+ENTRYPOINT Flask_APP=/opt/source-code/app.py flask run
+
+Layer 1: Base Ubuntu Layer   - 120 mb
+Layer2: Changes in apt packages  - 306 mb
+Layer 3: Changes in pip packages - 6.3 mb
+Layer 4: Source Code - 229 b 
+Layer 5: Update Entrypoint - 0b 
+
+To create a volume and mount in docker
+
+to create a volume in default path /var/lib/docker/volumes
+$: docker volume create data_volume
+$: docker run -v data_volume:/var/lib/mysql mysql
+
+To mount/bind a specific path volume to a container.
+
+$: docker volume create /data/data_volume2
+$: docker run --mount type=bind,source=/data/mysql,target=/var/lib/mysql mysql
+
+CSI (Container storage interface)- Amazon Ebs
+
+----------------------------------------------------------
+
+Volumes to mount for AWS
+
+volumes:
+- name: data-volume
+  awsElasticBlockStore: 
+    volumeID: <volume-id>
+	fstype: ext4
+	
+To save normally in a node, we use
+
+volumes:
+- name: data-volume
+hostPath:
+  path: /data
+  type: Directory
+  
+  Using PVCs in Pods
+Once you create a PVC use it in a POD definition file by specifying the PVC Claim name under persistentVolumeClaim section in the volumes section like this:
+
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+spec:
+  containers:
+    - name: myfrontend
+      image: nginx
+      volumeMounts:
+      - mountPath: "/var/www/html"
+        name: mypd
+  volumes:
+    - name: mypd
+      persistentVolumeClaim:
+        claimName: myclaim
+
+
+The same is true for ReplicaSets or Deployments. Add this to the pod template section of a Deployment on ReplicaSet.
+
+
+
+Reference URL: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes
+
+
+-----------------------------------------------------------------------------
+
+
+
+
+
+ 	
+	 
+	 
+	 
+
+
