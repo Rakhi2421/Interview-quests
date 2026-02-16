@@ -1,0 +1,13 @@
+# Using Priority class in pod-definition.yaml
+
+apiVersion: v1
+kind: Pod 
+metadata:
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+    ports:
+    - containerPort: 80
+  schedulerName: my-custom-scheduler

@@ -1,0 +1,22 @@
+# To taint a node
+# $: Kubectl taint nodes node1 app=myapp:NoSchedule
+# To remove a taint on node
+# $: Kubectl taint nodes node1 app=myapp:NoSchedule-
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+  labels:
+    env: dev
+spec:
+  containers:
+    - image: nginx
+      name: nginx
+      ports:
+      - containerPort: 80 
+  tolerations:
+   - key: "app"
+     operator: "Equal"
+     value: "myapp"
+     effect: "NoSchedule"    

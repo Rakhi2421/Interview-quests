@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-app
+spec:
+  maxReplicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      conatiners:
+      - name: my-app
+        image: nginx
+        resizePolicy:
+        - resourceName: cpu
+          restartPolicy: NotRequired
+        - resourceName: memory
+          restartPolicy: RestartContainer
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          lists:
+            cpu: "500m"
+            memory: "512Mi"            

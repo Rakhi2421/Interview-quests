@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dashboard-sa 
+  namespace: default
+
+
+  ---- using in a pods
+apiVersion: v1
+kind: Pod 
+metadata: 
+  name: My-pods
+spec: 
+ containers:
+  - name: nginx
+    image: nginx
+ ServiceAccountName: dashboard-sa   

@@ -1,0 +1,22 @@
+# If our request to select based on size or only one label, we use nodeselctor.
+# IF our request is to choose node either large or medium, or not a small ones, we can define it in nodeaffinity.
+kind: Pod
+metadata:
+  name: mypod
+  labels:
+    env: dev
+spec:
+  containers:
+    - image: nginx
+      name: nginx
+      ports:
+      - containerPort: 80 
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: color
+            operator: In
+            values: 
+            - blue  

@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: monitoring-daemon 
+  labels:
+    env: dev
+spec:
+  # selector for the pods that this ReplicaSet manages
+  selector:
+    matchLabels:
+      app: monitoring-agent
+  # template for the pods that the ReplicaSet creates      
+  template:
+    metadata:
+      name: mypod
+      labels:
+        app: monitoring-agent
+    spec:
+      containers:
+        - image: monitoring-agent
+          name: monitoring-agent
+          ports:
+          - containerPort: 80  

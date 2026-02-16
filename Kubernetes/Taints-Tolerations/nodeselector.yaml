@@ -1,0 +1,18 @@
+# Pre-requistes
+# Label the node first using the command:
+# $: kubectl label nodes <node-name><label-key>=<label-value>
+# $: Kubectl label nodes node01 size=large
+# We can't use a expressions like "OR", "Not Equals to" in Nodeselector
+kind: Pod
+metadata:
+  name: mypod
+  labels:
+    env: dev
+spec:
+  containers:
+    - image: nginx
+      name: nginx
+      ports:
+      - containerPort: 80 
+  nodeSelector:
+   size: Large 
