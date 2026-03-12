@@ -1504,14 +1504,669 @@ Reference URL: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#c
 
 
 -----------------------------------------------------------------------------
+Linux Networking Basics
+
+Networking Prerequisites:
+Switching and Routing
+ - Switching
+ - Routing
+ - Default Gateway
+DNS
+ - DNS Configurations on Linux
+ - CoreDNS Introduction
+Networking Namespaces
+Docker Networking
+
+ip link - it is used to list and modify interfaces on host.
+ip addr - to see ip address assigned to the interface
+ip route or route - it is used to view the routing table.
+ip route add 192.168.1.0/24 via 192.168.2.1
+cat /proc/sys/net/ipv4/ip_forward   --> command to check ip forward is enabled on the host.
+
+-------------------------------------------------------------------------
+Prerequisites DNS
+
+DNS Server consists of all the name resolutions.
+
+DNS Server IP: 192.168.1.100 : /etc/hosts
+192.168.1.11 db
+192.168.1.12 web
+192.168.1.13 prod
+
+if we add this DNS server ip in all servers then each server can get the packets if we ping with name (e.g. ping db )
+
+cat /etc/nsswitch.config
+
+hosts:   files dns
+
+whrn we ping db from web, first it will check local hosts file if name server is defines, if it's not found then it will check dns server hosts file.
+
+Domain names:
+.com - for commercial organizational Purpose
+.net - for network 
+.edu - for eductional organization purpose 
+.org - for non-profit organozational purpose 
+.io - 
+
+Record Types
+
+A-Record : It is used to map domain with the ip address
+AAAA _Record: It is used to map domain with the ipv6 address.
+CName_ Record: It is used to map one name with the another name.
+
+
+nslookup - it query only dns server
+dig - It is used to test DNS Name Resolution.
+
+Prerequisite - CoreDNS
+In the previous lecture, we saw why you need a DNS server, how it can help manage name resolution in large environments with many hostnames and Ips, and how you can configure your hosts to point to a DNS server. In this article, we will see how to configure a host as a DNS server.
+
+We are given a server dedicated as the DNS server and a set of IPs to configure as entries in the server. There are many DNS server solutions out there; in this lecture, we will focus on a particular one – CoreDNS.
+
+So, how do you get core DNS? CoreDNS binaries can be downloaded from their Github releases page or as a docker image. Let’s go the traditional route. Download the binary using curl or wget. And extract it. You get the coredns executable
+
+$ curl -LO https://github.com/coredns/coredns/releases/download/v1.12.4/coredns_1.12.4_linux_amd64.tgz
+$ tar -zxf coredns_1.12.4_linux_amd64.tgz 
+Run the executable to start a DNS server. It, by default, listens on port 53, which is the default port for a DNS server.
+
+Now, we haven’t specified the IP to hostname mappings. For that, you need to provide some configurations. There are multiple ways to do that. We will look at one.
+
+First, we put all of the entries into the DNS servers /etc/hosts file. Then, we configure CoreDNS to use that file. CoreDNS loads its configuration from a file named Corefile.
+
+Here is a simple configuration that instructs CoreDNS to fetch the IP to hostname mappings from the file /etc/hosts. When the DNS server is run, it now picks the IPs and names from the /etc/hosts file on the server.
+
+.:53 {
+    # Use /etc/hosts to resolve hostname
+    hosts /etc/hosts {
+        reload 1m
+        fallthrough
+    }
+ 
+    # Forward unmatched queries to the host's resolver
+    forward . /etc/resolv.conf {
+       max_concurrent 1000
+    }
+    cache 30
+    log
+    errors
+}
+CoreDNS also supports other ways of configuring DNS entries through plugins. We will look at the plugin that it uses for Kubernetes in a later section.
+
+Read more about CoreDNS here:
+
+https://github.com/kubernetes/dns/blob/master/docs/specification.md
+
+https://coredns.io/plugins/kubernetes/
+
+---------------------------------------------------------------------------------------------
+
+Prerequisites - Network Namespaces
+
+Bridge
+1. Create network namespace
+2. create bridge network/namespace
+3. create veth pairs (pipe, virtual cable)
+4. Attach Veth to namespace
+5. Attach other veth to bridge
+6. Assign Ip address
+7. Bring the interfaces up
+8. Enable NAT-IP masquerade
+
+
+
+Prerequisites - Docker Networking
+
+NONE Network - if we are using this network, containers won't communicate with each other and unable to communicate outside
+Host Network - If we use this network, container uses the host ip and allow the application access over HOSTIP:Port
+Bridege Network - In Production, we mostly use this nework as it will creates a Internal private network and it has a seperate private ip address subnet 172.20.0.0 and each container or device connecting to this network gets a seperate ip address like 172.20.0.3, 172.20.0.4,...
+If we run, docker run -p 8080:80 nginx, then in server iptables the below rule is added.
+iptables \
+  -t nat \
+  -A PREROUTING \
+  -j DNAT \
+  --dport 8080 \
+  --to-destination 172.20.0.3:80
+  
+CNI (Container Networking Interface): 
+
+Bridge
+1. Create network namespace
+2. create bridge network/namespace
+3. create veth pairs (pipe, virtual cable)
+4. Attach Veth to namespace
+5. Attach other veth to bridge
+6. Assign Ip address
+7. Bring the interfaces up
+8. Enable NAT-IP masquerade
+
+$: bridge add <conatainer_id> <namespace>
+
+CNI Is a set of standards that is define how programs that should be developed to solve networking challenges in a container runtime. The programs that are referred to as plugins.
+CNI Defines a set of responsibilities for a container runtime.
+- container runtime must create network namespace
+- identify the network the container must attach to
+- Container runtime to invoke Netwok Plugin(bridge) when container is added.
+- Container runtime to invoke Netwok Plugin(bridge) when container is deleted.
+- JSON format of the network configuration.
+
+CNI Plugin  standards 
+- Must support command line arguments ADD/DEL/Check
+- Must support parameters container id, network ns, etc.
+- Must manage IP address assignment to Pods.
+- Must return results in a specific format.
+
+CNI Plugins are calico, flannel , cilium
+
+Commands for networking:
+ip link
+ip addr
+ip addr add 192.168.1.10/24 dev eth0
+ip route add 192.168.1.0/24 via 192.168.2.1
+netstat -ntlp
+ip route
+arp
+route
+cat /proc/sys/net/ipv4/ip_forward
+
+kubeapiserver : 6443
+etcd: 2379
+kube-controller-manager: 10257
+kube scheduler: 10259
+kubelet: 10250
+etcd: 23780
+
+CNI Weave
+
+we deploy weaves as a service or daemon set on each node in the cluster either manually or as a pod using kubernetes.
+Weaves peers are deployed as a cluster.
+
+IPAM(IP Address Management) CNI:
+
+-----------------------------------------------------------
+
+Service Networking:
 
 
 
 
 
- 	
+
+
+
+
+
+
+
+---------------------------------------------
+DNS in Kubernetes:
+
+Kubernetes deploys a built in DNS server named kube-dns by default in a cluster.
+
+Fully qualified domain name for the service
+
+
+1. What names are assigned to what objects?
+
+HostName: web-service
+Namespace: apps
+Type: svc
+Root: Cluster.local
+IP Address: 10.107.37.188
+
+2. Service DNS Records
+    https://web-service.apps.svc.cluster.local 
+
+3. Pod DNS Records.
+https://10-244-3-10.apps.pod.cluster.local 
+
+Core DNS in k8s
+
+HOW Kubernetes implements DNS in the nameservers.
+
+In cat /etc/resolv.conf search entry for the service is automatically be available.
+If you want to reach pod, you have to mention pod FQDN in resolv.conf file.
+
+Ingress:
+
+To Set up or Create  an Ingress Controller
+
+1. set up a deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata: 
+  name: nginx-ingress-controller
+spec:
+  replicas: 1
+  selector:
+     matchLabels:
+        name: nginx-ingress
+     template:
+       metadata:
+         labels:
+           name: nginx-ingress
+	   spec:
+        containers:
+          - name: nginx-ingress-controller 
+            image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.21.0
+       args:
+         - /nginx-ingress-controller
+         - --configmap=$(POD_NAMESPACE)/nginx-configuration
+       env:
+         - name: POD_NAME
+           valueFrom:
+              fieldRef:
+                 fieldPath: metadata.name
+         - name: POD_NAMESPACE
+           valueFrom:
+              fieldRef:
+                 fieldPath: metadata.namespace
+       ports:
+         - name: http
+           containerPort: 80
+         - name: https
+           containerPort: 443
+
+Service:
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-ingress
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port:443
+    targetPort: 80
+    protocol: TCP
+    name: https
+  selector:
+    name: nginx-ingress 
+	
+Configmap:
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-configuration 
+
+auth:
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: nginx-ingress-serviceaccount  
+        
+		   
+
+To create an Nginx resource
+
+Single domain for multiple services.
+
+ apiVersion: networking.k8s.io/v1
+ kind: Ingress
+ metadata:
+    name: ingress-wear-watch
+ spec:
+   rules:
+   - https:
+        paths:
+        - path: /wear 
+          backend:
+            service:
+              name: wear-service
+              port: 80
+		-path: /watch
+         backend: 
+            service:
+              name: watch-service 
+              port: 80			  
+
+Sub domains for each service
+
+ apiVersion: networking.k8s.io/v1
+ kind: Ingress
+ metadata:
+    name: ingress-wear-watch
+ spec:
+   rules:
+   - host: wear.my-online-store.com 
+     http:
+        paths:
+        - path: /wear 
+          backend:
+            service:
+              name: wear-service
+              port: 80
+   - host: watch.my-online-store.com 
+     http:
+        paths:
+        - path: /watch 
+          backend:
+            service:
+              name: watch-service
+              port: 80
+Article: Ingress
+As we already discussed Ingress in our previous lecture. Here is an update.
+
+In this article, we will see what changes have been made in previous and current versions in Ingress.
+
+Like in apiVersion, serviceName and servicePort etc.
+
+
+Now, in k8s version 1.20+ we can create an Ingress resource from the imperative way like this:-
+
+Format - kubectl create ingress <ingress-name> --rule="host/path=service:port"
+
+Example - kubectl create ingress ingress-test --rule="wear.my-online-store.com/wear*=wear-service:80"
+
+Find more information and examples in the below reference link:-
+
+https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#-em-ingress-em-
+
+References:-
+
+https://kubernetes.io/docs/concepts/services-networking/ingress
+
+https://kubernetes.io/docs/concepts/services-networking/ingress/#path-types
+
+Ingress - Annotations and rewrite-target
+Different ingress controllers have different options that can be used to customise the way it works. NGINX Ingress controller has many options that can be seen here. I would like to explain one such option that we will use in our labs. The Rewrite target option.
+
+Our watch app displays the video streaming webpage at http://<watch-service>:<port>/
+
+Our wear app displays the apparel webpage at http://<wear-service>:<port>/
+
+We must configure Ingress to achieve the below. When user visits the URL on the left, his/her request should be forwarded internally to the URL on the right. Note that the /watch and /wear URL path are what we configure on the ingress controller so we can forward users to the appropriate application in the backend. The applications don't have this URL/Path configured on them:
+
+http://<ingress-service>:<ingress-port>/watch --> http://<watch-service>:<port>/
+
+http://<ingress-service>:<ingress-port>/wear --> http://<wear-service>:<port>/
+
+Without the rewrite-target option, this is what would happen:
+
+http://<ingress-service>:<ingress-port>/watch --> http://<watch-service>:<port>/watch
+
+http://<ingress-service>:<ingress-port>/wear --> http://<wear-service>:<port>/wear
+
+Notice watch and wear at the end of the target URLs. The target applications are not configured with /watch or /wear paths. They are different applications built specifically for their purpose, so they don't expect /watch or /wear in the URLs. And as such the requests would fail and throw a 404 not found error.
+
+To fix that we want to "ReWrite" the URL when the request is passed on to the watch or wear applications. We don't want to pass in the same path that user typed in. So we specify the rewrite-target option. This rewrites the URL by replacing whatever is under rules->http->paths->path which happens to be /pay in this case with the value in rewrite-target. This works just like a search and replace function.
+
+For example: replace(path, rewrite-target)
+
+In our case: replace("/path","/")
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-ingress
+  namespace: critical-space
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /pay
+            pathType: Prefix
+            backend:
+              service:
+                name: pay-service
+                port:
+                  number: 8282
+In another example given here, this could also be:
+
+replace("/something(/|$)(.*)", "/$2")
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rewrite
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  rules:
+    - host: rewrite.bar.com
+      http:
+        paths:
+          - path: /something(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: http-svc
+                port:
+                  number: 80
+
+---------------------------------------------
+	API Gateway:
+
+
+
+
+Important Update: Kubernetes the Hard Way
+Installing Kubernetes the hard way can help you gain a better understanding of putting together the different components manually.
+
+An optional series on this is available at our youtube channel here:
+
+
+
+https://www.youtube.com/watch?v=uUupRagM7m0&list=PL2We04F3Y_41jYdadX55fdJplDvgNGENo
+
+
+
+The GIT Repo for this tutorial can be found here: https://github.com/mmumshad/kubernetes-the-hard-way
+
+
+The vagrant file used in the next video is available here:
+
+https://github.com/kodekloudhub/certified-kubernetes-administrator-course
+
+Here's the link to the documentation:
+
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
+-----------------------------------------------------------------------------------------------------
+
+Provisioned 3 VMs, 1 master, 2 woker nodes
+
+Make sure 3 VMs are in the same subnet
+On all 3 nodes do the following.
+1.Download the public signing key for the kubernetes package repositories	
+2. copy the specific apt repository for k8s
+3. sudo apt update
+4. sudo apt-get install -y kubeadm kubectl kubelet 
+5. sudo apt-mark hold kubeadm kubectl kubelet 
+6. kubeadm version
+7. sudo apt install -y containerd
+8. cgroup drivers- It is the linux feature or linux primitive that allows when you working with docker or k8s, that allows you to specify resource limits on your containers.
+   2 types of cgroup drivers.
+   1. cgroupfs
+   2. systemd
+   before selecting the type, you need to make sure both kubelet and container runtime using the same.
+   
+  $: ps -p 1 --> It is used to verify what our init system is
+  
+  /etc/conatainerd/config.toml - here we have to mention the cpgroup driver.
+  
+  In master node run the below command.
+  kubeadm init --apiserver-advertise-address 192.168.56.11 --pod-network-cidr "10.244.0.0/16"  --upload-certs
+  
+  ----------------------------------------------------------------------------------------------------
+  
+  Helm Introduction:
+  
+  Helm works as a package manager with install or uninstall wizard and also as a release manager helping us upgrade or roleback.
+
+ helm install wordpress
+helm upgrade wordpress
+helm rollback wordpress
+helm uninstall wordpress
+
+Installing Helm 
+
+k8s/
+|- environments/
+|    |- values.dev.yaml
+|    |- values.stg.yaml
+|    |- values.prod.yaml 
+|- templates/
+     |-nginx-deployment.yaml
+	 |-nginx-service.yaml
+	 |-db-deployment.yaml
+	 |-db-service.yaml 
+
+Helm is more than just a tool to customize configuartions on a per environment basis. Helm is also a package manager for your APP.
+Helm provides extra features like conditionals, loops, functions, and hooks
+Helm templates are not valid YAML as they use go templating syntax
+ Complex templates become hard to read.
+--------------------------------------------------------------------------------------
+Kustomize is used to use the same code  for different environments like dev, test and prod.
+
+
+It has 2 key terms.
+1. base config 
+2. Overlays 
+
+base file:
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+	  component: nginx
+  template:
+    metadata:
+	  labels:
+	    component: nginx
+    spec:
+      conatiners:
+        - name: nginx
+          image: nginx 
+
+Overlays file:
+overlays/dev folder
+  spec: 
+   replicas: 2
+overlays/prod folder
+  spec: 
+   replicas: 5
+   
+ Kuztomize Folder Structure 
+ k8s/
+ |- base/    --------------------share or default configs across all environments
+ |    |- kustomization.yaml 
+ |    |- nginx-depl.yaml 
+ |    |- service.yaml 
+ |    |- redis-depl.yaml 
+ |- overlays/ -----------------------Environment specific configuration taht add or ,modify the base config
+ |   |- dev/
+     |    |- kustomization.yaml 
+	 |    |- config-map.yaml
+	 |- stg/
+	 |    |- kustomization.yaml
+	 |    |-configmap.yaml 
 	 
 	 
-	 
+Kustomize
+Base+ Overlay = Final Manifest
 
+Kustomize comes built-in with kubectl so no other packages need to be installed
+  May still want to install the kustomize cli to get the latest version. kubectl doesn't come with the latest version.
 
+Does not require learning how to use any complex & hard to read templating systems(like helm).
+Every artifact the Kustomize uses is plain YAML and can be validated and processed as such.  
+
+Install Kuztomize
+$: curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+$: Kustomize version --short 
+
+Kustomize looks for a kustomization file which contains:
+ List of all the Kubernetes manifests kustomize should manage.
+ All of the customizations that should be applied
+The kustomize build command combines all the manifests and applies the defined transformations
+The kustomize build command does not apply/deploy the kubernetes resources to a cluster.
+
+Kustomize Output:
+
+Apply Kustomize Configs
+$: kustomize build k8s --> doesnt apply/update 
+$: kustomize build k8s/ | kubectl apply -f -
+$: kustomize apply -k k8s/
+
+Delete Kustomize Configs
+$: kustomize build k8s/ | kubectl delete -f -
+$: kustomize delete -k k8s/
+
+Managing Directories
+
+k8s/
+|-kustomization.yaml
+|-api/
+|  |-kustomization.yaml
+|  |-api-depl.yaml
+|  |-api-service.yaml
+|-db/
+|  |-kustomization.yaml
+|  |-db-depl.yaml
+|  |-db-service.yaml
+
+k8s/kustomization.yaml
+ apiVersion: kustomize.config.k8s.io/v1beta1
+ kind: Kustomization
+
+ # Kubernetes resources to be managed by kustomize
+ resources:
+ - api/
+ - db/
+
+k8s/api/kustomization.yaml
+ apiVersion: kustomize.config.k8s.io/v1beta1
+ kind: Kustomization
+
+ # Kubernetes resources to be managed by kustomize
+ resources:
+ - api-depl.yaml
+ - api-service.yaml 
+ 
+ Common Transformers:
+ Common Label - adds a label to all kubernetes resources
+ namePrefix/Suffix - adds a common prefix-suffix to all resource names 
+ Namespace - adds a common namespace to all resources.
+ commonAnnotations - adds an annotations to all resources 
+ 
+ Image Transformers
+ images:
+  - name: nginx
+    newTag: "1.23"
+  - name: postgres
+    newName: mysql 
+	
+Patch:
+
+Kustomize patches provide another method to modifying kubernetes configs
+Unlike common transformers, patches provide a more "surgical" approach to targeting one or more specific sections in a kubernetes resource.
+To create a patch 3 parameters must be provided:
+ - Operation Type: add/remove/replace.
+ - Target: what resource should this patch be applied on
+   - kind
+   - version/Group
+   - Name
+   - Namespace
+   - Labelselector
+   - AnnotationSelector
+ - Value: What is the value that will either be replaced or added with(only needed for add/replace operations)
+
+2 Patch Strategies:
+Inline JSON6902
+Strategic merget patch
+
+Overlays:
