@@ -824,6 +824,74 @@ resource "aws_instance" "web" {
   I use conditional expressions for environment-specific configurations, locals for reusable computed values, built-in functions for dynamic data handling, and triggers with null_resource when I need controlled re-execution.
 </b></details>
 
+<details><summary>33. What is a null resource in Terraform?</summary><br><b>
+
+  A null_resource in Terraform is a resource that doesn’t create any actual infrastructure, but is used to execute scripts or perform actions during the Terraform lifecycle.
+
+  ```bash
+resource "null_resource" "run_script" {
+  triggers = {
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    command = "bash deploy.sh"
+  }
+}
+```
+Explanation:
+- triggers forces Terraform to re-run the resource when values change
+- timestamp() ensures it runs every time
+</b></details>
+<details><summary>34. What is Terraforom Taint?</summary><br><b>
+
+  Terraform Taint is used to forcefully recreate a resource in the next terraform apply, even if there are no configuration changes.
+  - We use taint when:
+    - A resource is partially broken
+    - Provisioning failed midway
+    - Manual changes caused inconsistency
+    - You want to recreate without changing code
+</b></details>
+
+<details><summary>35. What is Terraform Refresh?</summary><br><b>
+
+  Terraform Refresh is used to update the Terraform state file with the real-time infrastructure state from the provider (like AWS), without making any changes to the actual resources.
+  
+  - Reads current infra (EC2, S3, etc.)
+  - Compares with state file
+  - Updates the state file only
+  - Does NOT modify infrastructure
+</b></details>
+<details><summary>36. Using count i deployed instances and want to keep a single instance which is important and i'm not sure about the index , how to safely delete the 9 instances without deleting important one? </summary><br><b>
+  
+  Since count is index-based and I’m not sure which index is critical, I would first identify the correct instance using terraform state show. Then I would safely move that instance to a separate resource using terraform state mv, and finally reduce or destroy the remaining instances. This avoids accidental deletion of the important resource.
+</b></details>
+<details><summary>37. How do you detect and fix configuration drift?</summary><br><b>
+
+  Configuration drift happens when actual infrastructure differs from Terraform code, usually due to:
+  - Manual changes in cloud console
+  - Scripts outside Terraform
+  - Failed or partial deployments
+
+    How do I detect drift?
+    - Using terraform plan
+      ```bash
+      terraform plan
+      ```
+    - Using refresh-only mode
+      ```bash
+      terraform apply -refresh-only
+
+      Updates state without changing infra
+      Helps confirm drift safely
+      ```
+    - CI/CD Drift Detection (Real-world)
+      - In production, I:
+      - Run terraform plan in Jenkins pipeline daily
+      - Alert if any drift is detected
+      - Prevent unauthorized manual changes
+</b></details>
+
 
 
 
