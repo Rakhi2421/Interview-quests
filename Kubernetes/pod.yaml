@@ -10,3 +10,8 @@ spec:
       name: nginx
       ports:
       - containerPort: 80    
+  # Commands used while working with pods
+  1. kubectl run nginx --image=nginx
+  2. k get po
+  3. k delete po
+  4. k describe po
