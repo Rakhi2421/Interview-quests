@@ -142,3 +142,14 @@ S3 API
          - namespace
   Applications inside the pod use this token to talk to the **Kubernetes API server.
 </b></details>
+
+<details><summary>Design VPC</summary><br><b>
+
+  I design a highly available VPC across multiple AZs with public and private subnets. Public subnets host load balancers and NAT gateways, while application and database tiers are placed in private subnets. I use route tables to control traffic, security groups for instance-level security, and NACLs for subnet-level protection. I also ensure high availability using Auto Scaling and multi-AZ deployment, and enhance security using VPC endpoints and SSM instead of bastion hosts.
+</b></details>
+
+<details><summary>VPC Endpoint</summary><br><b>
+
+  A VPC Endpoint allows private communication between a VPC and AWS services without using the internet. There are two types: Gateway endpoints for S3/DynamoDB and Interface endpoints for other services using PrivateLink. It improves security, reduces cost, and is widely used in private subnet architectures.   
+  VPC endpoints are not enabled by default and are not used for communication between subnets. They must be explicitly created to allow private connectivity from a VPC to AWS services. Gateway endpoints are configured using route tables for services like S3, while interface endpoints require subnet and security group configuration and create ENIs inside the VPC.
+</b></details>
