@@ -78,3 +78,109 @@
 
  In Kubernetes, stateless application don’t store data between sessions. Every pod is identical and replaceable. These are managed using deployments which handle scaling and rolling updates easily. Stateful application need to retain data and have stable identities like databases. These are managed using stateful sets which ensures number one persistent storage with stable volume, number two consistent quad names and order and number three predictable network identities. So use deployments for stateless application like web servers and stateful set for stateful application like MySQL, Kafka or Radius.
 </b></details>
+
+<details><summary>1. What is Kubernetes?</summary><br><b>
+ 
+ Kubernetes is a platform for automating the deployment, scaling, and management of containerized applications. It manages multiple containers across machines and ensures applications run reliably and efficiently.
+</b></details> 
+<details><summary>2. What are the main components of Kubernetes architecture?</summary><br><b>
+ 
+ Kubernetes architecture consists of two main parts: the Control Plane (Master Node) and Worker Nodes. The Control Plane makes decisions and manages the cluster, while Worker Nodes run the actual applications in containers.
+ </b></details> 
+ <details><summary>3. What is the role of the API Server?</summary><br><b>
+  
+  The API Server acts as the control center of Kubernetes. It receives and processes all requests from users and components, and serves as the gateway to interact with the cluster.
+ </b></details> 
+ <details><summary>4. What does the Scheduler do in Kubernetes?</summary><br><b>
+  
+  The Scheduler decides which worker node should run a pod based on resource availability, constraints, and policies.
+</b></details> 
+<details><summary>5. What is the role of the Controller Manager?</summary><br><b>
+ 
+ The Controller Manager ensures the cluster remains in the desired state. It monitors the system and takes corrective actions, such as restarting or replacing failed pods.
+</b></details> 
+<details><summary>6. What is etcd in Kubernetes?</summary><br><b>
+ etcd is a highly available key-value store that stores the entire cluster state and configuration. It acts as the source of truth for the Kubernetes cluster.
+</b></details> 
+<details><summary>7. What are Worker Nodes in Kubernetes?</summary><br><b>
+ 
+ Worker Nodes are machines where applications run. They host pods and include components like kubelet, container runtime, and kube-proxy.
+</b></details> 
+<details><summary>8. What is kubelet?</summary><br><b>
+ 
+ Kubelet is an agent running on each worker node. It ensures containers in pods are running and healthy, and communicates with the API Server for instructions.
+</b></details> 
+<details><summary>9. What is a Container Runtime?</summary><br><b>
+ 
+ The container runtime is the software responsible for running containers. It pulls container images and executes them inside pods on the worker node.
+</b></details> 
+<details><summary>10. What is kube-proxy?</summary><br><b>
+ 
+ kube-proxy manages networking within the cluster. It sets up rules to route traffic to the correct pods and ensures load balancing across services.
+ </b></details> 
+ <details><summary>11. What is a Pod in Kubernetes?</summary><br><b>
+  
+  A Pod is the smallest deployable unit in Kubernetes. It contains one or more containers that share networking and storage resources.
+ </b></details> 
+ <details><summary>12. How does Kubernetes work (basic flow)?</summary><br><b>
+  
+  A user submits a request using kubectl or a YAML file. The API Server processes the request and stores it in etcd. The Scheduler selects a suitable node, and the kubelet on that node starts the container inside a pod. kube-proxy ensures networking, while controllers maintain the desired state.
+</b></details> 
+<details><summary>13. What happens when you run kubectl apply -f pod.yaml?</summary><br><b>
+ 
+ The request is sent to the API Server, which stores it in etcd. The Scheduler selects an appropriate node, and the kubelet on that node pulls the image and starts the container inside a pod.
+</b></details> 
+<details><summary>14. What happens if the Scheduler is down?</summary><br><b>
+  
+  New pods cannot be scheduled without the Scheduler. However, existing pods continue running, but autoscaling and new deployments will not work.
+</b></details> 
+<details><summary>15. What happens if etcd crashes?</summary><br><b>
+ 
+ The cluster becomes unstable because Kubernetes cannot read or write cluster state. Control Plane components will not function properly until etcd is restored.
+</b></details> 
+<details><summary>16. Can a pod be scheduled without kubelet?</summary><br><b>
+ 
+ No, kubelet is required to run and manage pods on a node. Even if a pod is scheduled, it will not start without kubelet.
+</b></details> 
+<details><summary>17. What is the role of kube-proxy?</summary><br><b>
+ 
+ kube-proxy handles network traffic routing between pods and services. It configures IP rules and ensures proper load balancing.
+</b></details> 
+<details><summary>18. How does the API Server authenticate user requests?</summary><br><b>
+ 
+ The API Server performs authentication (verifying identity), authorization (checking permissions), and admission control before processing requests.
+</b></details> 
+<details><summary>19. How do Control Plane and Worker Nodes communicate securely?</summary><br><b>
+ 
+ They communicate using TLS certificates via the API Server endpoint. kubelet securely interacts with the API Server.
+</b></details> 
+<details><summary>20. Can a node run both Control Plane and Worker components?</summary><br><b>
+ 
+ Yes, especially in development environments like Minikube. In production, they are usually separated for better performance and security.
+</b></details> 
+<details><summary>21. What happens if a node goes down?</summary><br><b>
+ 
+ The Controller Manager detects the failure, marks the node as unavailable, and reschedules pods to other healthy nodes if possible.
+</b></details> 
+<details><summary>22. What stores the current state of the Kubernetes cluster?</summary><br><b>
+ 
+ etcd stores the entire cluster state and configuration as a key-value store.
+</b></details> 
+<details><summary>23. What happens during a rolling update?</summary><br><b>
+ 
+ Pods are gradually replaced with new versions without downtime. The Scheduler assigns new pods, and kubelet starts them while old pods are terminated step by step.
+</b></details> 
+<details><summary>24. How does the Scheduler choose a node?</summary><br><b>The Scheduler evaluates factors like CPU, memory, resource availability, affinity rules, and tolerations to select the best node.
+</b></details> 
+<details><summary>25. Why is the API Server considered the single point of truth?</summary><br><b>
+ 
+ All cluster interactions go through the API Server, which reads and writes to etcd. No operation happens without passing through it.
+</b></details> 
+<details><summary>26. Can kubelet restart a crashed container?</summary><br><b>
+ 
+ Yes, kubelet monitors containers and restarts them based on the pod's restart policy.
+</b></details> 
+<details><summary>27. What happens if you delete a pod manually?</summary><br><b>
+ 
+ The ReplicaSet or controller detects the missing pod and creates a new one to maintain the desired state.
+</b></details>
