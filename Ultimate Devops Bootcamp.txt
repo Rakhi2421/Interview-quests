@@ -1,0 +1,273 @@
+Ultimate Devops Bootcamp
+
+Shell Types:
+
+1. Bourne Shell (sh shell)
+2. C Shell (csh or tcsh)
+3. Z Shell (zsh)
+4. Bourne again Shell (bash)
+
+Run the below command on which shell you are in or using.
+$: echo $SHELL
+/bin/bash
+
+$: echo Hi   ---> Print to screen
+Hi
+
+$: ls        ---> Lists files& Folders
+
+$: cd my_dir1  --> Change Directory
+
+$: pwd        --> Present working directory
+
+$: mkdir new_directory --> Make directory
+$: mkdir -p /tmp/asia/india/bangalore --> to create a directories in a directory at a same time.
+
+$: cd new_directory; mkdir www; pwd    --> to run Multiple commands at a time.
+
+$: touch new_file.txt --> creates a new file
+
+$: cat > new_file.txt  --> Add contents to file
+
+VI Editor - Command Mode
+---------------------------
+Move Around    -- Arrow keys  or k- up, h-left, j-down, l-right
+Delete         -- x - delete character   dd- delete an entire line
+copy & Paste   -- yy - copy  p-paste
+Scroll Up/Down  -- ctrl+u    ctrl+d
+Command         -- :
+save            -- :w
+Quit(discard)   --:q
+save+Quit      -- :wq
+Find           -- /of- to find of word in a file
+-----------------------------------------------------------------------------------------------
+User Accounts:
+--------------------------------
+whoami       -- to know which user you are...
+id           -- gives more information about the user  such as userid, group id, groups
+su username  -- to switch from one user to another user
+ssh username@IP -- to connect to another server
+sudo ls /root  -- to open files when u don't have permissions
+-----------------------------------------------------------------------------------------------
+Download Files:
+--------------------------------
+$: curl https://www.some-site.com/file.txt -O  
+file.txt
+Here O is used to save the file as a text, unless it just prints the file name
+
+$: wget https://www.some-site.com/file.txt -O some-file.txt
+-----------------------------------------------------------------------------------------------
+Check OS Version:
+---------------------------------
+$: ls /etc/*releases*
+$: cat /etc/*se
+-----------------------------------------------------------------------------------------------
+Package Manager
+--------------------------------
+Redhat package Manager(rpm)
+
+rpm -i telnet.rpm   --> To install a package
+rpm -e telnet       --> To uninstall a package
+rpm -q telnet       --> To Query a Package
+rpm -qa             --> to list all installations.
+
+Yum is the high level package manager
+under the hood , yum uses rpm 
+
+default directory -> /etc/yum.repos.d
+$: yum repolist  --> TO see list of repositories available in the system.
+$: Yum install https://dl.fedoraproject.org/pub/epel/epel-release-lastest-7.noarch.rpm --> to install a repos and add it under the /etc/yum.repos.d
+$: Yum list ansible --> to display the package name
+$: yum remove ansible  --> to remove a package
+$: yum --showduplicates list ansible --> to see the latest update package details and old ones.
+$: yum install ansible-2.4.2.0
+-----------------------------------------------------------------------------------------------
+Services
+- Services in Linux can help you to configure software to run in the background and makesure they run all the time automatically when server reboots
+----------------
+
+$: service httpd start 
+       or
+$: systemctl start httpd
+
+Here, Systemctl is the command used to manage services on a system manage server.
+
+$: systemctl stop httpd   --> to stop HTTPD service
+$: systemctl status httpd --> to check HTTPD service
+$: systemctl enable httpd --> to Configure HTTPD service to start at startup
+$: systemctl disable httpd --> To Configure Httpd not to start at startup.
+
+To Create a service:
+$: cd /etc/system/system
+$: vi my_app.service     --> my_app.service is a unit configuration file
+[Unit]                     --> This is used to provide metadata of this application.
+Description=My python web application  
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/code/my_app.py    --> Exact command to run this application
+ExecStartPre=/opt/code/configure_db.sh            --> used to configure service should run before app runs
+ExecStartPost=/opt/code/email_status.sh           --> used to configure service should run after app runs
+Restart=always                --> This is used to restart if application crashes
+
+[Install]                    --> It is used to configure a service should be up, post that our service will start at boot up, in this case multi-user.target will be running at bootup, post that our service will run.
+WantedBy=multi-user.target         
+$: systemctl daemon-reload --> to let system know that a new service is configured.
+$: systemctl start my_app.service 
+$: systemctl enable my_app.service 
+-----------------------------------------------------------------------------------------------
+Networking Basics 
+------------------
+Networking Pre-Requisites
+- Switching
+- Routing
+- Default Gateway
+- DNS Configuration on Linux
+
+$:ip link -- to list and modify interfaces on the host
+$: ip addr add 192.168.1.10/24 dev eth0  --> to set ip address on the interfaces.
+$: ip route --> it is used to view the routing table
+$: ip route add 192.168.1.0/24 via 192.168.2.1  --> it is used to add an entry in routing table.
+$: cat /proc/sys/net/ipv4/ip_forward --> it is used to check the ipforwarding enabled in a host if host is used as a router.
+----------------------------------------------------------------------------------------------
+DNS
+-------------
+DNS Server --> Update /etc/hosts file with all servers and their hostnames
+Worker servers --> update /etc/resolv.conf with nameserver DNS_SERVER_IP --> so that worker servers communicate with each other using names instead of ip.
+
+$: nslookup domain_name --> to see domain ip and details
+$: dig domain_name --> works same as nslookup
+
+A record maps domain name with ipv4 address
+AAAA record maps domain name with ipv6 address
+cNAME record maps domain name with name
+---------------------------------------------------------------------------------------------
+Programming Languages
+----------------------
+Java,C,C++ --> Developed, compiled, and then executed.
+Python, NodeJs, Ruby, - Developed and executed
+
+Compiler - It translates human readable code to Machine Language and do the vice-versa
+
+-----------------------------------
+Java
+----
+Install Java:
+1. Visit the Java Development Kit Archive.
+https://jdk.java.net/archive/
+2. Use the curl command to download the JDK archive directly into /opt:
+$: sudo curl https://download.java.net/java/GA/jdk20/bdc68b4b9cbc4ebcb30745c85038d91d/36/GPL/openjdk-20_linux-x64_bin.tar.gz \
+--output /opt/openjdk-20_linux-x64_bin.tar.gz
+3. Extract the JDK archive into /opt:
+$: sudo tar -xf /opt/openjdk-20_linux-x64_bin.tar.gz -C /opt/
+4. Verify the installation by checking the version:
+$: /opt/jdk-20*/bin/java -version
+5. Set path variable with the command export PATH=$PATH:/opt/jdk-20/bin
+
+JDK(Java Development Kit)
+It is a set of tools that will help you develop, build and run java applications on a system.
+
+Develop:
+jdb  -- java debugger tool
+Javadoc -- java document tool to document the code
+
+Build:
+javac -- Once source code is developed to build and compile your application using the javac tool.
+jar  -- JAR Tool helps archive the code and related libraries into a single jar file.
+
+Run:
+JRE (Java Runtime Environment) -- A JRE is needed to run a java application on any given system.
+java  -- java command line utility or the loader that is used to run the application.
+
+Java Build & Packaging:
+-----------------------
+
+1. Deploy Source code 
+
+MyClass.java
+public class MyClass {
+ public static void main(String[] args) {
+   System.out.println("Hello World");
+}
+}
+
+2. Compile
+
+javac MyClass.java
+
+3. Run
+
+java MyClass
+
+Source Code ---Compiler--MyClass.class  --JVM--Machine code
+
+Above process is for a single file, but in reality many files will be there so packaging comes in
+
+Package:
+--------
+$: jar cf MyAPP.jar MyClass.class Service1.class Service2.class .....
+MyApp.jar
+
+Run
+$: java -jar MyApp.jar
+
+Document:
+---------
+$: Javadoc -d doc MyClass.java
+
+Build Process:
+-------------
+1. Develop    ---- Source code
+2. Compile    ---- javac MyClass.java
+3. Package    ---- jar cf MyClass.jar
+4. Run        ---- java -jar MyClass.jar
+5. Document   ---- Javadoc -d doc MyClass.java
+
+If it comes to large applications we can't proceed with this process, so we are depending on other build tools.
+Build Tools:
+--------------
+Maven  - pom.xml
+Gradle - build.gradle
+Ant - build.xml
+-----------------------------------------------------------------------------------------------
+NodeJs:
+
+Node.js took javascript out of the web browsers and onto the server side.
+
+1. Run the following script to install the latest lts version of nodejs:
+
+# Download and install nvm:
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# in lieu of restarting the shell
+\. "$HOME/.nvm/nvm.sh"
+
+#Install node using nvm
+nvm install --lts
+
+2. Add node to system wide PATH using the command:
+
+sudo install -m 755  $(which node) /usr/local/bin/
+
+3. Verify installation using the command:
+node -v
+
+
+NPM: 
+--------------
+It means Node Package Manager allows developers to develop new reusable packages and modules and share them over public repositories.
+
+when nodejs is installed npm will also be installed automatically.
+
+To check version
+$: npm -v
+
+To search file, which needs to be installed.
+$: npm search file
+
+to install 
+$: npm install file
+-------------------------------------------------------------------------------------------
+Python
+
+pip is the package manager for python
+flask is a web framework for python
