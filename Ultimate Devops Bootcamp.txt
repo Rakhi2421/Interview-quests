@@ -271,3 +271,113 @@ Python
 
 pip is the package manager for python
 flask is a web framework for python
+
+-------------------------------------------------------------------------------------
+
+What is CICD?
+
+CI - Continuous integration --> In this process we run unit tests, integration tests and then package code.
+CD - Continuous Delivery  --> when manual intervention requires for application deployment like approve to deploy or need to manually click a build button.
+CD - Continuous Deployment --> Manual Intervention is not required, automatically deployment will done.
+
+--------------------------------------------------------------------------------------------
+Jenkins
+---------
+
+readlink -f /usr/bin/java - to find actual Java home
+find / -name "jenkins.service" 2>/dev/null - to find the service file location
+
+Environment="JENKINS_JAVA_CMD=/usr/bin/java"
+Environment="JAVA_HOME=/usr/lib/jvm/java-21-openjdk"
+Environment="JENKINS_PORT=9090"
+
+To troubleshoot Jenkins
+
+-------------------------------------------
+what are plugins?
+
+Plugins allows you to connect to other services
+
+------------------------------------------------------------------------------------------
+
+Docker Engine
+-Install Docker Engine means installing Docker CLI, REST API, Docker Daemon
+
+Docker daemon is a background process that manages docker objects such as images containers, volumes and networks.
+
+REST API Server is the api interface that programs can use to talk to the daemon to provide instructions.
+
+Docker cli is the terminal where we can perform actions like running a container, deleting, stoping containers, destroying images.
+***************************************************************************
+Accessing remote docker server from our personal laptop docker cli
+
+docker -H=10.123.2.1:2375 run nginx
+***************************************************************************
+
+How Docker containerize applications ?
+
+Under the hood, docker uses namespaces to isolate workspace 
+Process ID (PID), Network, InterProcess, Mount, Unix Timesharing are created in their namespace
+
+**********************************************************************************************
+Namespace-PID
+
+ps command to check all the running processes.
+
+cGroups
+
+Docker uses cgroups or control groups to restrict the amount of hardware resources allocated to each  container.
+
+docker run --cpus=.5 ubuntu  <to use not more than 50% of host cpu>
+docker run --memory=100m ubuntu
+**********************************************************************************************
+Docker Storage
+
+File system
+
+/var/lib/docker
+- aufs
+- containers
+- image
+- volumes
+
+Two Types of Mounts
+- Volume mount means mount a volume under the /var/lib/docker/volumes to container
+
+- Bind mount means mount a directory path to container  /data/MySQL
+
+docker volume -v data_volume:/var/lib/MySQL MySQL
+docker run --mount type=bind,source=/data/MySQL,target=/var/lib/MySQL MySQL
+
+docker uses storage drivers to enable layered architecture
+
+storage drivers
+- aufs
+- zfs
+- btrfs
+- device mapper
+- overlay
+- overlay2
+
+--------------------------------------------------------------------------------------
+
+Docker Networking
+Bridge Network - It is a private internal network created by docker on the host
+None Network - Containers are not attached to any network and doesn't have any access
+
+docker network create \
+     -- driver bridge \
+     --subnet 182.18.0.0/16
+     custom-isolated-network
+
+
+containers can reach each other using their names
+
+MySQL.connect(mysql) 
+docker has a builtin dns server that helps each other to resolve each other using container names.
+127.0.0.11(DNS Server)
+
+docker uses network namespaces that creates a separate namespace for each container
+------------------------------------------------------------------------------------------
+
+
