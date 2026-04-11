@@ -1,0 +1,396 @@
+Common Terraform Meta-Arguments
+1️. count
+Creates multiple instances of a resource.
+resource "aws_instance" "web" {
+  count = 2
+  ami   = "ami-123"
+}
+Creates 2 EC2 instances.
+
+2. for_each
+Creates multiple resources using a map or set.
+resource "aws_s3_bucket" "bucket" {
+  for_each = toset(["dev", "qa", "prod"])
+  bucket   = "my-${each.key}"
+}
+Better than count when working with named resources.
+
+3. depends_on
+Defines explicit dependency.
+depends_on = [aws_vpc.main]
+Used when implicit dependency is not enough.
+
+4.lifecycle
+Controls creation/destruction behavior.
+lifecycle {
+  prevent_destroy = true
+}
+
+5. provider
+Specifies which provider to use (multi-region setup).
+provider = aws.us_east
+
+Terraform blocks:
+- Providers
+- variables
+-outputs
+- modules
+- local
+
+Full Terraform Core Components
+provider
+resource
+data
+variable
+output
+module
+locals
+terraform block
+lifecycle (meta-argument)
+count
+for_each
+depends_on
+
+
+K8s Master Setup:
+
+1. sudo swapoff -a
+2. sudo apt-get update
+3. sudo apt-get install containerd -y
+4. ps -p 1
+5. sudo mkdir /etc/containerd
+6. containerd config default | sed 's/SystemdCgroup = false/SystemdCgroup = true/' | sudo tee /etc/containerd/config.toml
+7. sudo sed -i '/swap/d' /etc/fstab
+8. sudo modprobe br_netfilter
+9. sudo systemctl restart containerd
+10. sudo apt-get update
+11. sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+12. curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+13. echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+14. sudo apt-get update
+15. sudo apt-get install -y kubelet kubeadm kubectl
+16. sudo apt-mark hold kubelet kubeadm kubectl
+17. sudo systemctl enable --now kubelet
+18. echo "net.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/k8s.conf
+19. sudo sysctl --system
+20. sudo kubeadm init --apiserver-advertise-address 172.31.46.20 --pod-network-cidr "10.10.0.0/16" --upload-certs
+21. mkdir -p $HOME/.kube
+22. sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+23. sudo chown $(id -u):$(id -g) $HOME/.kube/config
+24. wget https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+25. vi kube-flannel.yml - change ip address to 10.10.0.0/16 in configmap
+26. kubectl apply -f kube-flannel.yml
+After Worker joined we can label it 
+27.  kubectl label node ip-172-31-33-75 node-role.kubernetes.io/worker=worker
+	
+kubeadm join 172.31.43.72:6443 --token ew0y46.1wygb0zdckqtkq5q \
+        --discovery-token-ca-cert-hash sha256:6488cca3e3cce8d1592a29a8c4397847450fa0d132d25e1761f64291b12a7b4b
+
+
+K8s Worker setup:
+
+1. sudo swapoff -a
+2. sudo sed -i '/swap/d' /etc/fstab
+3. sudo apt-get update
+4. sudo apt-get install containerd -y
+5. sudo mkdir /etc/containerd
+6. containerd config default | sed 's/SystemdCgroup = false/SystemdCgroup = true/' | sudo tee /etc/containerd/config.toml
+7. sudo apt-get update
+8. sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+9. curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+10. echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.35/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+11. sudo apt-get update
+12. sudo apt-get install -y kubelet kubeadm kubectl
+13. sudo apt-mark hold kubelet kubeadm kubectl
+14. sudo systemctl enable --now kubelet
+15. echo "net.ipv4.ip_forward = 1" | sudo tee /etc/sysctl.d/k8s.conf
+sudo modprobe br_netfilter
+16. sudo sysctl --system
+17. sudo systemctl restart containerd
+18. sudo kubeadm join 172.31.46.20:6443 --token 7vurvs.kwzr7u43bywygkpx         --discovery-token-ca-cert-hash sha256:8dac9a529655d1af18c57cd8b12c43a09f77e64d776e2201917704c18210f936
+
+Jenkins Setup:
+
+1. apt install openjdk-21-jre-headless
+2. vi install.sh
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
+https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+/etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt update
+sudo apt install jenkins
+
+3. systemctl enable jenkins.service
+4. systemctl start jenkins.service
+
+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
+
+Trivy Installation:
+
+sudo apt-get install wget gnupg
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+sudo apt-get update
+sudo apt-get install trivy
+
+kubectl create ns webapps
+
+Service Account:
+
+
+apiVersion : v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: webapps
+
+
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: mysecretname
+  namespace: webapps
+  annotations:
+    kubernetes.io/service-account.name: jenkins
+
+
+
+pipeline {
+    agent { Rocky OS }
+    tools {
+        jdk 'jdk17'
+        maven 'maven3'
+    }
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+    
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'main', credentialsId: 'git-cred', url: 'https://github.com/Rakhi2421/Boardgame.git'
+            }
+        }
+        stage('Compile') {
+            steps {
+                sh "mvn compile"
+            }
+        }
+        stage('Test') {
+            steps {
+                sh "mvn test"
+            }
+        }
+        stage('File System scan') {
+            steps {
+                sh "trivy fs --format table -o trivy-fs-report.html ."
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+               withSonarQubeEnv('sonar') {
+                   sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=BoardGame -DSonar.projectkey=BoardGame \
+                   -Dsonar.java.binaries=. '''
+               }
+            }
+        }
+        stage('QualityGate') {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                sh "mvn package"
+            }
+        }
+        stage('Publish to Nexus') {
+            steps {
+                withMaven(globalMavenSettingsConfig: 'global-settings', jdk: 'jdk17', maven: 'maven3', traceability: true) {
+                    sh "mvn deploy"
+               }
+            }
+        }
+        stage('Build & Tag Docker Image') {
+            steps {
+                script {
+                  withCredentials([usernamePassword(
+                    credentialsId: 'docker-cred',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                     sh '''
+                     echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                     docker build -t srirakesh124/boardgame:latest . 
+                     '''
+                  }  
+                }
+            }    
+        }
+        stage('Docker Image scan') {
+            steps {
+                sh "trivy image --format table -o trivy-image-report.html srirakesh124/boardgame:latest"
+            }
+        }
+        stage('Docker Push Image') {
+            steps {
+                script {
+                  withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                     sh "docker push srirakesh124/boardgame:latest"
+                    }  
+                }
+            }
+        }
+          stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                  withKubeConfig(caCertificate: '', clusterName: 'kubernetes', contextName: '', credentialsId: 'k8-secret', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://172.31.94.230:6443') {
+                      sh "kubectl apply -f deployment-service.yaml"
+                    }  
+                }
+             }
+          }
+    }
+}
+
+jenkins --version    - 2.541.3
+
+ubuntu@ip-172-31-85-172:~$ docker version
+Client: Docker Engine - Community
+ Version:           29.3.1
+ API version:       1.54
+ Go version:        go1.25.8
+ Git commit:        c2be9cc
+ Built:             Wed Mar 25 16:13:32 2026
+ OS/Arch:           linux/amd64
+ Context:           default
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          29.3.1
+  API version:      1.54 (minimum version 1.40)
+  Go version:       go1.25.8
+  Git commit:       f78c987
+  Built:            Wed Mar 25 16:13:32 2026
+  OS/Arch:          linux/amd64
+  Experimental:     false
+ containerd:
+  Version:          v2.2.2
+  GitCommit:        301b2dac98f15c27117da5c8af12118a041a31d9
+ runc:
+  Version:          1.3.4
+  GitCommit:        v1.3.4-0-gd6d73eb8
+ docker-init:
+  Version:          0.19.0
+  GitCommit:        de40ad0
+
+trivy version
+Version: 0.69.3
+
+root@ip-172-31-94-230:~# containerd --version
+containerd github.com/containerd/containerd 1.7.28
+
+root@ip-172-31-94-230:~# kubectl version 
+Client Version: v1.35.3 
+Kustomize Version: v5.7.1 
+Server Version: v1.35.3 
+
+root@ip-172-31-94-230:~# kubeadm version 
+kubeadm version: &version.Info{Major:"1", Minor:"35", EmulationMajor:"", EmulationMinor:"", MinCompatibilityMajor:"", MinCompatibilityMinor:"", GitVersion:"v1.35.3", GitCommit:"6c1cd99aef09161ddb07b8ade6c9564e9b9bfe27", GitTreeState:"clean", BuildDate:"2026-03-18T18:32:11Z", GoVersion:"go1.25.7", Compiler:"gc", Platform:"linux/amd64"} 
+
+root@ip-172-31-94-230:~# kubelet --version 
+Kubernetes v1.35.3 
+
+
+Worker 
+   22  mkdir -p $HOME/.kube
+   23  sudo cp admin.conf $HOME/.kube/config
+   24  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+   25  scp ubuntu@172.31.94.230:/etc/kubernetes/admin.conf .
+   26  sudo export KUBECONFIG=/etc/kubernetes/kubelet.conf
+   27  export KUBECONFIG=/etc/kubernetes/kubelet.conf
+   28  k get no
+   29  sudo k get no
+   30  sudo su -
+   31  k get no
+   32  kubectl get no
+   33  sudo systemctl restart kubelet
+   34  sudo modprobe br_netfilter
+   35  sudo sysctl -w net.bridge.bridge-nf-call-iptables=1
+   36  sudo sysctl -w net.ipv4.ip_forward=1
+   37  echo "br_netfilter" | sudo tee /etc/modules-load.d/k8s.conf
+   38  cat <<EOF | sudo tee /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-iptables=1
+net.ipv4.ip_forward=1
+EOF
+
+   39  sudo sysctl --system
+   40  sudo systemctl restart kubelet
+   41  kubectl delete pod -n kube-flannel kube-flannel-ds-rrh8b
+   42  ls /run/flannel/
+   43  history
+
+Master
+   18  k get no
+   19  k create ns webapps
+   20  ls
+   21  cd /home/ubuntu/
+   22  ls
+   23  k apply -f svc.yaml
+   24  vi role.yaml
+   25  k apply -f role.yaml
+   26  vi role-bind.yaml
+   27  k apply -f role-bind.yaml
+   28  vi sec.yaml
+   29  cd /home/ubuntu/
+   30  ls
+   31  vi sec.yaml
+   32  k apply -f sec.yaml
+   33  kubectl apply -f sec.yaml
+   34  kubectl describe secret mysecretname -n webapps
+   35  cd ~/.kube/
+   36  ls
+   37  cat config
+   38  k get po
+   39  kubectl get po
+   40  kubectl get po -n webapps
+   41  kubectl describe po boardgame-deployment-55d7956dc-7lzrm
+   42  kubectl describe po boardgame-deployment-55d7956dc-7lzrm -n webapps
+   43  kubectl get po -n webapps
+   44  kubectl describe po boardgame-deployment-68d76dfff7-27wzg -n webapps
+   45  kubectl get pods -n kube-flannel
+   46  kubectl logs -n kube-flannel kube-flannel-ds-rrh8b
+   47  cd /home/ubuntu/
+   48  vi kube-flannel.yml
+   49  history
+   50  exit
+   51  history
+   52  kubect get po
+   53  kubectl get po
+   54  kubectl get po -n webapps
+   55  kubectl get ns
+   56  kubectl get all -n kube-flamnel
+   57  kubectl get all -n kube-flannel
+   58  kubectl delete pod -n kube-flannel kube-flannel-ds-rrh8b
+   59  kubectl get all -n kube-flannel
+   60  kubectl logs -n kube-flannel po kube-flannel-ds-wml64
+   61  kubectl logs -n kube-flannel pod kube-flannel-ds-wml64
+   62  kubectl logs -n kube-flannel kube-flannel-ds-wml64
+   63  sudo modprobe br_netfilter
+   64  kubectl delete pod -n kube-flannel kube-flannel-ds-wml64
+   65  ls /run/flannel/
+   66  kubectl get pods -n kube-flannel
+   67  ubectl get pods -n webapps
+   68  kubectl get pods -n webapps
+   69  kubectl get svc -n webapps
+   70  history
+root@ip-172-31-94
+
+CPU: 8 RAM: 16GB
+
+Dev : Namespace - 2 , RAM - 2 
+qa 
