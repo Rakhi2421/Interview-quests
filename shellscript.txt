@@ -1,0 +1,616 @@
+Shell Scripting
+
+Scripts:
+- Contains a series of commands
+- An interpreter executes commands in the script.
+
+-----------------------------------------------------------
+Example:
+script.sh
+
+#!/bin/bash
+echo "Scripting is fun"
+
+----------------
+$: chmod 755 script.sh
+$: ./script.sh
+Scripting is fun
+
+$: ./sleep.sh &
+[1] 12345
+
+./sleepy.sh → Executes the script named sleepy.sh from the current directory
+& → Tells the shell to run the process in the background
+----------------------------------------------------------
+
+Variables:
+
+- Storage locations that have a named
+- Name-value pairs
+
+VARIABLE_NAME="Value"
+
+Variables are case-sensitive
+By convention variables are uppercase
+
+Usage:
+
+#!/bin/bash
+MY_SHELL="bash"
+
+echo "I Like the $MY_SHELL shell."
+echo "I am ${MY_SHELL}ing on my keyboard"
+
+Assigning Command output to a variables
+#!/bin/bash
+SERVER_NAME=$(hostname)
+echo "You are running this script on ${SERVER_NAME}."
+
+----------------------------------------------------------
+
+Tests:
+
+[ condition-to-test-for ]
+
+usage:
+[ -e /etc/passwd ]
+
+File operators(tests)
+
+-d File - True if file is a directory
+-e File - True if file exists
+-f File - True if file exists and is a regular file.
+-r File - True if file is readable by you.
+-s File - True if file exists and is not empty.
+-w File - True if file is writable by you.
+-x File - True if file is executable by you.
+
+String Operators (tests)
+
+-z STRING - True if string is empty.
+-n STRING - True if string is not empty.
+STRING1=STRING2
+    True if the strings are equal.
+STRING1!=STRING2
+    True if the strings are not equal.
+	
+Arithmetic Operators (tests)
+
+arg1-eq arg2 -> True if arg1 is equal to arg2.
+arg1-ne arg2 -> True if arg1 is not equal to arg2.
+-lt -> less than
+-le -> less than or equal to
+-gt -> greater than
+-ge -> greater than or equal to.
+
+----------------------------------------------------------------------------------------------
+Making Decisions 
+----------------------------------------
+If Statement:
+
+if [ condition-is-true ]
+then 
+  command 1
+  command 2
+  command 3
+fi
+
+
+
+example:
+#!/bin/bash
+MY_SHELL="bash"
+
+if [ "$MY_SHELL" = "bash" ]
+then
+  echo "This is IF statement"
+fi
+---------------------------------------
+
+IF-ELSE Statement:
+
+if [ condition-is-true ]
+then
+  CommandN
+else
+  CommandN
+fi
+
+#!/bin/bash
+MY_SHELL="csh"
+
+if [ "$MY_SHELL" = "bash"]
+then
+  echo "It seems you like the bash shell"
+else
+  echo "It seems you don't like the bash shell."
+fi
+-----------------------------------------
+
+IF/ELIF/ELSE:
+
+if [ condition-is-true ]
+then
+  CommandN
+elif [ condition-is-true ]
+then
+  CommandN
+else
+  CommandN
+fi 
+
+-----------------------------------------
+
+For Loop:
+
+for VARIABLE_NAME in ITEM_1 ITEM_N
+do 
+  command 1
+  command 2
+  command 3
+done
+
+example:
+
+#!/bin/bash 
+for COlOR in red green blue
+do
+echo "COLOR: $COLOR"
+done
+
+#!/bin/bash
+COLORS="red blue green"
+
+for COLOR in $COLORS
+do
+ echo "COLOR: $COLOR"
+done
+
+Realtime Example
+
+#!/bin/bash
+PICTURES=$(ls *jpg)
+DATE=$(date +%F)
+
+for PICTURE in $PICTURES
+do
+ echo "Renaming ${PICTURE} to ${DATE}-${PICTURE}"
+ mv ${PICTURE} ${DATE}-${PICTURE}
+done
+
+--------------------------------------------
+Positional Parameters:
+
+$ script.sh parameter1 parameter2 parameter3
+
+    $0: "script.sh"
+	$1: "parameter1"
+	
+example:
+
+#!/bin/bash
+
+echo "Executing script: $0"
+for USER in $@
+do 
+  echo "Archiving user: $USER"
+  # Lock the account
+  passwd -l $USER
+  # Create an archieve of the home directory
+  tar cf /archives/${USER}.tar.gz /home/${USER}
+done
+
+$: ./archieve_user.sh rakesh jashu
+
+------------------------------------------
+
+Accepting User Input(STDIN)
+
+The read command accepts STDIN
+
+Syntax:
+    read -p "PROMPT" VARIABLE
+
+Example:
+
+#!/bin/bash
+
+read -p "Enter a user name: " USER
+echo "Archiving user: $USER"
+
+# Lock the account
+passwd -l $USER
+
+# Create an archieve of the home directory.
+tar cf /archives/${USER}.tar.gz /home/${USER}
+
+---------------------------------------------------------------------------------------
+Exit Status and Return Codes
+
+- Every command returns an exit status
+- Range from 0 to 255
+- 0 = success
+- Other than 0 = error condition
+- Use for error checking
+
+Checking the exit status
+
+- $? contains the return code of the previously executed command.
+
+ls /not/here
+echo "$?"
+
+example:
+
+HOST="google.com"
+ping -c 1 ${HOST}
+
+if [ "$?" -eq "0" ]
+then
+ echo "$HOST reachable"
+else
+ echo "$HOST Unreachable"
+fi
+
+(or)
+
+HOST="google.com"
+ping -c 1 ${HOST}
+RETURN_CODE=$?
+
+if [ "$RETURN_CODE" -eq "0" ]
+then
+ echo "$HOST reachable"
+else
+ echo "$HOST Unreachable"
+fi 
+
+--------------------------------------
+&& and ||
+
+&& = AND - it will execte if exit status of previous command is 0, means previous command ran successful. 
+mkdir /tmp/bak && cp test.txt /tmp/bak/
+
+|| = OR  - it will execte if exit status of previous command is not equal to 0
+cp test.txt /tmp/bak/ || cp test.txt /tmp
+
+--------------------------------------------
+The semicolon
+
+- Seperate commands with a semicolon to ensure they all get executed.
+
+cp test.txt /tmp/bak ; cp test.txt /tmp
+
+Exit status usage
+
+HOST="google.com"
+ping -c 1 ${HOST}
+RETURN_CODE=$?
+
+if [ "$RETURN_CODE" -ne "0" ]
+then
+ echo "$HOST Unreachable"
+ exit 1
+fi 
+exit 0
+
+-----------------------------------------------------------------
+DRY (Don't repeat Yourself!)
+Functions: 
+A function is simply a block of reusable code that performs an action and returns an exit status or return code.
+- It must be defined before it is called.
+- when you call function you can pass data into that function as parameters.
+
+Functions can call other functions
+
+#!/bin/bash
+function hello() {
+   echo "Hello!"
+   now
+} 
+function now() {
+   echo "It's $(date +%r)"
+}
+hello 
+
+Project Backup files
+
+function backup_file () {
+  if [ -f $1 ]
+  then
+     BACK="/tmp/$(basename ${1}).$(date +%F).$$"
+	 echo "Backing up $1 to ${BACK}"
+	 cp $1 $BACK
+  fi	 
+}
+backup_file /etc/hosts
+if [ $? -eq 0 ]
+then
+  eho "Backup succeeded!"
+fi
+
+--------------------------------------------------------------------------------
+SHELL SCRIPT ORDER AND CHECKLIST
+
+1. Shebang
+2. Comments /file header
+3. Global Variables
+4. Functions
+   a. Local Variables
+ 5. Main script contents
+ 6. Exit with an exit status
+    a. exit<STATUS>at various exit points.
+	
+---------------------------------------------------------------------------------
+Wildcards:
+
+- A character or string used for pattern matching.
+- Globbing expands the wildcard pattern into a list of files and/or directories.
+- Wildcards can be used with most commands
+  - ls
+  - rm
+  - cp
+Wild cards are *, ? , [] , [!] , 
+
+* - matches zero or more characters.
+    - *.txt
+	- a*
+	- a*.txt
+? - matches exactly one character.
+    - ?.txt
+	- a?
+	- a?.txt
+[] - A character class.
+     - Matches any of the characters include between the brackets. Matches exactly one character.
+	   - [aeiou]
+	   - ca[nt]* 
+	      - acceptable words are can, cat. candy,catch
+[!] - Matches any of the characters NOT included between the brackets. Matches exactly one character
+      - [!aeiou]*
+	    - baseball
+		- cricket
+Use two characters seperated by a hyphen to create a range in a character class.
+- [a-g]*    - Matches all files that start with a,b,c,d,e,f or g.
+- [3-6]*     - Matches all files that start with 3,4,5,6.
+
+Named Character classes
+
+- [[:alpha:]] 
+- [[:alnum:]]
+- [[:digit:]]
+- [[:lower:]]
+- [[:space:]]
+- [[:upper:]]
+
+- \- escape character. Use if you want to match a wildcard character.
+   - Match all files that end with a question mark:
+    - *\?
+	   -done?
+
+#!/bin/bash
+for File in *.html
+do
+   echo "Copying the $File "
+   cp $File /var/www-just-html
+done 
+-----------------------------------------------------------------------------------------------
+
+Case Statements  
+
+- Alternative to if statement
+- easy to used
+
+case "$1" in
+    start|START)
+	   /usr/sbin/sshd
+	   ;;
+	stop|STOP)
+	   kill $(cat /var/run/sshd.pid)
+	   ;;
+	*)
+	  echo "Usage: $0 start|stop" ; exit 1
+	  ;;
+esac
+
+read -p "Enter y or n: " ANSWER
+case "$ANSWER" in
+    [yY] | [yY][eE][sS])
+	     echo "You answered yes."
+		 ;;
+	[nN] | [nN][oO])
+	     echo "you answered no."
+		 ;;
+	*)
+        echo "Invalid answer."
+		;;
+esac
+
+read -p "Enter y or n: " ANSWER
+case "$ANSWER" in
+    [yY]*)
+	     echo "You answered yes."
+		 ;;
+	[nN]*)
+	     echo "you answered no."
+		 ;;
+	*)
+        echo "Invalid answer."
+		;;
+esac
+-----------------------------------------------------------------------------
+Logging
+
+Syslog
+-  The syslog standard uses facilities and severities to catrgorize messages.
+  - facilities: Kern, user, mail, daemon, auth, local0,local7
+  - Severities: emarg,alert,crit,err,warning,notice,info,debug
+Log file locations are configurable:
+- /var/log/messages
+- /var/log/syslog
+
+Logging with logger
+- The logger utility by default creates messages with user.notice messages
+-------------------------------------------------------------------------------------------
+While loops
+
+while [ condition-is-true ]
+do
+  command 1
+  command N
+done 
+
+While loop format
+
+while [ condition-is-true ]
+do
+  # commands change the condition 
+  command 1
+  command N
+done 
+
+Infinite Loops
+
+while [ condition-is-true ]
+do
+  # commands do not change
+  # the condition
+  command N
+done 
+
+-------------------------------------------------------------------------------------
+Sed = Stream editor
+A stream is a data that travels from:
+- One process to another through a pipe
+- one file to another as a redirect
+- One device to another.
+Sed performs text transformations on streams.
+Examples:
+ - Substitute some text for other text
+ - Remove lines
+ - Append text after given lines.
+ - Insert text before certain lines.
+Sed is used programmatically, not interactively.
+
+type -a sed  --> to see where it is running or exact path: /usr/bin/sed
+
+sed 's/assistant/manager' manager.txt 
+Here s means substitute
+/ - delimeter
+assistant is going to be replaced with manager in manager.txt 
+
+sed 's/ASSISTANT/manager/' manager.txt
+sed is case sensitive so no changes will occur, unless there is a word with capitals in that file.
+
+sed 's/search-pattern/replacement-string/flags'
+
+to ignore case sensitive use flags after the things, we can use i or I both works same
+sed 's/ASSISTANT/manager/i' manager.txt
+sed 's/ASSISTANT/manager/i' manager.txt
+
+sed 's/assistant/manager/' manager.txt
+This command replaces only the first assistant word in a line so we use flag g to replace all words.
+
+sed 's/assistant/manager/g' manager.txt
+sed 's/assistant/manager/2' manager.txt -> to replace a second word of all lines.
+
+sed -i.bak 's/assistant/manager/' manager.txt then changes will be applied and saved as a file manager.txt.bkp
+
+to change /home/jason to /export/users/jasonc
+
+echo '/home/jason' | sed 's/\/home\/jason/\/export\/users\/jasonc/'
+echo '/home/jason' | sed 's#/home/jason#/export/users/jasonc#'
+echo '/home/jason' | sed 's:/home/jason:/export/users/jasonc:'
+
+sed '/This/d' manager.txt   --> deletes a lines contains this
+sed '/^#/d' manager.txt   --> deletes a lines contains #
+sed '/^$/d' manager.txt   --> deletes an empty lines between lines
+sed '/^$/d ; /^#/d' manager.txt  --> deletes both empty and # lines
+sed '/^$/d ; /^#/d ; s/assistant/manager/' manager.txt  -->performs all actions
+sed  -e '/^$/d' -e '/^#/d' -e 's/assistant/manager/' manager.txt  -->performs all actions
+
+Script file File
+
+echo '/^#/d' > script.sed
+echo '/^$/d' >> script.sed
+echo 's/apache/httpd' >> script.sed
+
+sed -f script.sed manager.txt  --> performs all actions mention in the script file
+
+Addressing
+sed '2 s/apache/httpd/' config
+2nd line will be changed
+sed '/Group/ s/apache/httpd/' config
+line start with group content will be changed 
+
+-----------------------------------------------------------------------------------------------------------------------------
+Command: A command is a line that tells terminal to perform an action.
+---------------------------------------------------------------------------
+Redirect:
+> - errases existing data in a file and add the date which we mentioned
+>> - appends the data to the existing data
+----------------------------------------------------------------------------
+Pipe:  |   -> output of commad1 will become input to command2
+----------------------------------------------------------------------------
+find:  It is used to look files wherever it is.
+
+find newfolder/ -name aaa.txt
+newfolder/A-folder/aaa.txt
+
+find newfolder/ 
+find newfolder/ -type file   or -type f
+find newfolder/ -type d 
+-------------------------------------------------------------------------------
+grep :
+
+grep -i so b.txt   --> here -i ignore the case sensitive.
+
+-------------------------------------------------------------------------------
+awk:   this command is to print the data in a file in our required format.
+
+awk '{print $1}' text1.txt --> to print the first column
+awk '{print $NF}' text1.txt --> to print the last column
+awk '{print $(NF-1)}' text1.txt --> to print the last to 2nd column
+awk 'NR==2 {print $0}' text1.txt --> to print the 2nd row.
+awk -F ";" {print $0}' text1.txt --> to print files without ;
+
+awk '/usa/ {print $0}' text1.txt --> to print only lines contains usa word.
+awk '/usa|italy/ {print $0}' text1.txt --> to print only lines contains usa or italy word.
+awk '/i/ {print $0}' text1.txt --> to print only lines contains i in a word.
+awk '$2~/i/ {print $0}' text1.txt --> to print only lines contains i in a word in 2nd column.
+awk '{print length($2)}' text1.txt
+---------------------------------------------------------------------------------
+Read:  used for user input
+
+read -p "Enter your age: " age    --> it promts enter your age and the value we entered will be assigned to age.
+
+read -s password --> It prompts ? , there we need to type password, it wont be visible.
+
+read -sp "Enter Password: " passwd
+----------------------------------------------------------------------------------
+
+Arithmetic Expressions:
+
+echo " $((2+3))"
+5
+echo " $(( number1++ ))"
+echo " $(( number1-- ))"
+echo " $(( ++number1 ))"
+
+IF
+ELSE
+ELIF
+Exit
+Terminate / sleep
+
+for i in {0..6}
+do
+  echo "number: $i "
+  sleep 3
+done
+
+
+
+
+
+
+
